@@ -1,7 +1,7 @@
 preproc_antisac <- function(data) {
   data |>
     group_by(across(all_of(id_cols()))) |>
-    summarise(pc = mean(acc == 1))
+    summarise(pc = mean(acc == 1), .groups = "drop")
 }
 
 #' Switch Cost
@@ -33,7 +33,7 @@ preproc_shifting <- function(data) {
 preproc_crt <- function(data) {
   data |>
     group_by(across(all_of(id_cols()))) |>
-    filter(mean(acc == 1) > 0.8) |>
+    filter(mean(Correct == 1) > 0.8) |>
     ungroup() |>
     calc_spd_acc(
       name_rt = "Response_Time",
@@ -64,11 +64,11 @@ preproc_filtering <- function(data) {
     data_clean,
     family = binomial()
   )
-  slopes <- ranef(fit)$grp_id |>
+  slopes <- lme4::ranef(fit)$grp_id |>
     as_tibble(rownames = "grp_id") |>
     transmute(
       grp_id = as.integer(grp_id),
-      filt_eff = n_distractor + fixef(fit)["n_distractor"]
+      filt_eff = n_distractor + lme4::fixef(fit)["n_distractor"]
     )
   data_clean |>
     distinct(across(all_of(c("grp_id", id_cols())))) |>
@@ -222,8 +222,8 @@ preproc_stroop <- function(data) {
       )
     ) |>
     calc_spd_acc(
-      name_rt = name_rt,
-      name_acc = name_acc,
+      name_rt = "rt",
+      name_acc = "acc",
       .by = c(id_cols(), "type")
     ) |>
     pivot_longer(

@@ -1,11 +1,11 @@
-﻿task,disp_name,preproc
+task,disp_name,preproc
 AntiSac,anti-sac,antisac
 CateSwitch,size-life,cateswitch
 CRT,crt,crt
 DelayDiscount,,
 Filtering,filtering,filtering
-FNRecog,face-name,fnrecog
-KRecog,symbol-memory,krecog
+FNRecog,face-name,ltm
+KRecog,symbol-memory,ltm
 OSpan,op-span,ospan
 Reinf,,
 ShiftingColor,color-shape,shifting

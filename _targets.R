@@ -22,7 +22,8 @@ static_branches <- tarchetypes::tar_map(
           -any_of(id_cols()),
           names_to = "index",
           values_to = "score"
-        )
+        ) |>
+        select(-task_datetime)
     )
   )
 )
@@ -30,6 +31,11 @@ list(
   static_branches,
   tarchetypes::tar_combine(
     indices,
-    static_branches[[3]]
+    static_branches[[4]],
+    command = bind_rows(
+      !!!.x,
+      .id = "name"
+    ) |>
+      mutate(name = str_remove(name, "indices_"))
   )
 )
