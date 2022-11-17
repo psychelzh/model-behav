@@ -252,10 +252,10 @@ screen_data <- function(data) {
     group_by(sub_id) |>
     # keep the last commit only
     filter(
-      if_else(
-        is.na(task_datetime),
-        file == file[[1]],
-        row_number(desc(task_datetime)) == 1
+      case_when(
+        all(is.na(task_datetime)) ~ file == file[[1]],
+        all(!is.na(task_datetime)) ~ row_number(desc(task_datetime)) == 1,
+        TRUE ~ !is.na(task_datetime)
       )
     ) |>
     ungroup() |>
