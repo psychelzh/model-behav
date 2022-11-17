@@ -41,7 +41,8 @@ list(
       mutate(score = sum(c_across(starts_with("score")))) |>
       ungroup() |>
       transmute(
-        name = "keepTrack",
+        task = "keepTrack",
+        disp_name = "keep-track",
         sub_id = ID,
         index = "score",
         score
@@ -56,13 +57,15 @@ list(
     static_branches[[1]],
     command = bind_rows(
       !!!.x,
-      .id = "name"
+      .id = "task"
     ) |>
-      mutate(name = str_remove(name, "indices_")) |>
+      mutate(task = str_remove(task, "indices_")) |>
       semi_join(
         filter(task_indices, selected),
-        by = c("name", "index")
+        by = c("task", "index")
       ) |>
+      left_join(config, by = "task") |>
+      select(-preproc) |>
       bind_rows(indices_keepTrack)
   )
 )
