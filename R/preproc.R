@@ -251,7 +251,13 @@ screen_data <- function(data) {
     distinct(across(all_of(id_cols()))) |>
     group_by(sub_id) |>
     # keep the last commit only
-    filter(row_number(desc(task_datetime)) == 1) |>
+    filter(
+      if_else(
+        is.na(task_datetime),
+        file == file[[1]],
+        row_number(desc(task_datetime)) == 1
+      )
+    ) |>
     ungroup() |>
     left_join(data, by = id_cols())
 }
