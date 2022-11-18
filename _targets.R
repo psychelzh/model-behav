@@ -42,7 +42,7 @@ list(
       ungroup() |>
       transmute(
         task = "keepTrack",
-        disp_name = "keep-track",
+        disp_name = "keep_track",
         sub_id = ID,
         index = "score",
         score
