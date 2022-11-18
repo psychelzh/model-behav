@@ -1,0 +1,129 @@
+---
+title: Behavior Analysis
+author: Liang Zhang
+date: 2022-11-17
+format: 
+  revealjs:
+    code-fold: false
+execute: 
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+targets::tar_load(indices)
+indices_clean <- indices |> 
+  group_by(disp_name) |> 
+  filter(!performance::check_outliers(score, method = "iqr")) |> 
+  ungroup()
+indices_wider <- indices_clean |> 
+  unite("task_index", disp_name, index, remove = FALSE) |> 
+  pivot_wider(
+    id_cols = sub_id,
+    names_from = disp_name,
+    values_from = score
+  )
+```
+
+# Data Inspection
+
+## Distributions
+
+```{r}
+#| label: fig-distr
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Distributions for All Tasks.** They are all all fairly distributed as 
+#|   normal.
+indices_clean |> 
+  ggplot(aes(score)) +
+  geom_histogram() +
+  facet_wrap(~ disp_name, scales = "free")
+```
+
+## Missing Pattern
+
+```{r}
+#| label: fig-miss-pattern
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Misssing pattern.** Stop signal task has slightly more missing values.
+#|   Subjects with missing values at more than 20% of tasks are removed in
+#|   further analysis.
+indices_wider |> 
+  select(-sub_id) |> 
+  naniar::vis_miss() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+```{r}
+#| label: rm-sub-too-much-miss
+
+# use {tidytable} locally, which is faster
+indices_wider_clean <- withr::with_package(
+  "tidytable",
+  indices_wider |> 
+    rowwise() |> 
+    # mutate(prop_miss = mean(is.na(c_across(-sub_id)))) |> 
+    filter(mean(is.na(c_across(-sub_id))) < 0.2) |>
+    ungroup()
+)
+mdl_data <- select(indices_wider_clean, -sub_id)
+```
+
+# Model Building
+
+## Correlation Matrix
+
+```{r}
+#| label: fig-correlation
+#| fig-width: 8
+#| fig-height: 8
+#| fig-cap: "**Correlation Between Tasks**"
+mdl_data |> 
+  corrr::correlate() |> 
+  corrr::autoplot()
+```
+
+## The promising models
+
+:::: {.columns}
+
+::: {.column}
+```{r}
+#| label: fig-common-fac
+#| fig-width: 8
+#| fig-height: 8
+#| fig-cap: "**Common Factor Model**"
+fit <- psych::fa(mdl_data, 4)
+psych::fa.diagram(fit)
+```
+:::
+
+::: {.column}
+```{r}
+#| label: fig-bifac
+#| fig-width: 8
+#| fig-height: 8
+#| fig-cap: "**Bi-Factor Model**"
+fit <- psych::omega(mdl_data, 4)
+psych::omega.diagram(fit)
+```
+:::
+
+:::
+
+## Further Thoughts
+
+Some critical issues:
+
+* Models with one latent factor only have poor model fitting.
+  - Workaround: using bi-factor model and estimate general factor from the `g` factor.
+* Subjects with missing values can be hard to estimate factor scores
+  - Workaround: using CFA and full-information maximal likelihood method.

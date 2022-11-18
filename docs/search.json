@@ -1,0 +1,37 @@
+[
+  {
+    "objectID": "analysis.html#distributions",
+    "href": "analysis.html#distributions",
+    "title": "Behavior Analysis",
+    "section": "Distributions",
+    "text": "Distributions\n\nFigure 1: Distributions for All Tasks. They are all all fairly distributed as normal."
+  },
+  {
+    "objectID": "analysis.html#missing-pattern",
+    "href": "analysis.html#missing-pattern",
+    "title": "Behavior Analysis",
+    "section": "Missing Pattern",
+    "text": "Missing Pattern\n\nFigure 2: Misssing pattern. Stop signal task has slightly more missing values. Subjects with missing values at more than 20% of tasks are removed in further analysis."
+  },
+  {
+    "objectID": "analysis.html#correlation-matrix",
+    "href": "analysis.html#correlation-matrix",
+    "title": "Behavior Analysis",
+    "section": "Correlation Matrix",
+    "text": "Correlation Matrix\n\nFigure 3: Correlation Between Tasks"
+  },
+  {
+    "objectID": "analysis.html#the-promising-models",
+    "href": "analysis.html#the-promising-models",
+    "title": "Behavior Analysis",
+    "section": "The promising models",
+    "text": "The promising models\n\n\n\n\n\n\n\nFigure 4: Common Factor Model\n\n\n\n\n\n\n\n\n\n\nFigure 5: Bi-Factor Model\n\n\n\n\n\n\n\nFigure 6: Bi-Factor Model"
+  },
+  {
+    "objectID": "analysis.html#further-thoughts",
+    "href": "analysis.html#further-thoughts",
+    "title": "Behavior Analysis",
+    "section": "Further Thoughts",
+    "text": "Further Thoughts\nSome critical issues:\n\nModels with one latent factor only have poor model fitting.\n\nWorkaround: using bi-factor model and estimate general factor from the g factor.\n\nSubjects with missing values can be hard to estimate factor scores\n\nWorkaround: using CFA and full-information maximal likelihood method."
+  }
+]

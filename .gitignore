@@ -4,3 +4,6 @@
 .httr-oauth
 .DS_Store
 _targets
+
+/.quarto/
+_freeze/
