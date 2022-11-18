@@ -34,6 +34,11 @@ list(
     read = read_csv(!!.x, show_col_types = FALSE)
   ),
   tarchetypes::tar_file_read(
+    sub_id_transform,
+    "config/sub_id_transform.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
+  ),
+  tarchetypes::tar_file_read(
     indices_keepTrack,
     "data/keepTrack_4scores_all.csv",
     read = read_csv(!!.x, show_col_types = FALSE) |>
@@ -59,6 +64,8 @@ list(
       !!!.x,
       .id = "task"
     ) |>
+      left_join(sub_id_transform, by = c("sub_id" = "behav_id")) |>
+      mutate(sub_id = coalesce(fmri_id, sub_id), .keep = "unused") |>
       mutate(task = str_remove(task, "indices_")) |>
       semi_join(
         filter(task_indices, selected),
