@@ -39,22 +39,33 @@ list(
     read = read_csv(!!.x, show_col_types = FALSE)
   ),
   tarchetypes::tar_file_read(
+    data_clean,
+    "data/data_clean.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
+  ),
+  tar_target(
     indices_keepTrack,
-    "data/keepTrack_4scores_all.csv",
-    read = read_csv(!!.x, show_col_types = FALSE) |>
-      rowwise() |>
-      mutate(score = sum(c_across(starts_with("score")))) |>
-      ungroup() |>
-      transmute(
-        task = "keepTrack",
-        disp_name = "keep_track",
-        sub_id = ID,
-        index = "score",
-        score
-      ) |>
-      group_by(sub_id) |>
-      filter(row_number() == 1) |>
-      ungroup()
+    preproc_existed(
+      data_clean,
+      Keeptrack_ScoreAll,
+      disp_name = "keep_track"
+    )
+  ),
+  tar_target(
+    indices_FM,
+    preproc_existed(
+      data_clean,
+      starts_with("FM"),
+      disp_name = "false_mem"
+    )
+  ),
+  tar_target(
+    indices_Raven,
+    preproc_existed(
+      data_clean,
+      all_of(c(ranven_scoretest = "Raven2")),
+      disp_name = "rapm"
+    )
   ),
   static_branches,
   tarchetypes::tar_combine(
@@ -73,6 +84,10 @@ list(
       ) |>
       left_join(config, by = "task") |>
       select(-preproc) |>
-      bind_rows(indices_keepTrack)
+      bind_rows(
+        indices_keepTrack,
+        indices_FM,
+        indices_Raven
+      )
   )
 )

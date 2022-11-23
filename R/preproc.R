@@ -246,6 +246,22 @@ preproc_stroop <- function(data) {
     )
 }
 
+preproc_existed <- function(data, ..., disp_name) {
+  data |>
+    select(sub_id = ID, ...) |>
+    group_by(sub_id) |>
+    filter(row_number() == 1) |>
+    ungroup() |>
+    pivot_longer(
+      -sub_id,
+      names_to = "task_index",
+      values_to = "score"
+    ) |>
+    separate(task_index, c("task", "index")) |>
+    mutate(index = tolower(index)) |>
+    add_column(disp_name = disp_name)
+}
+
 screen_data <- function(data) {
   data |>
     distinct(across(all_of(id_cols()))) |>
