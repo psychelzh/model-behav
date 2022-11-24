@@ -1,7 +1,5 @@
 preproc_antisac <- function(data) {
-  data |>
-    group_by(across(all_of(id_cols()))) |>
-    summarise(pc = mean(acc == 1), .groups = "drop")
+  calc_spd_acc(data, .by = id_cols())
 }
 
 #' Switch Cost
@@ -123,35 +121,29 @@ preproc_twoback <- function(data) {
     mutate(
       type = case_when(
         is.na(base_loc) ~ "filler",
-        loc == base_loc ~ "stay",
-        TRUE ~ "change"
-      )
-    ) |>
-    filter(type != "filler") |>
-    mutate(
-      type = recode(type, stay = "s", change = "n"),
+        loc == base_loc ~ "same",
+        TRUE ~ "diff"
+      ),
       # no response means error
       acc = coalesce(acc, 0)
     ) |>
     group_by(across(all_of(id_cols()))) |>
     filter(sum(acc == 1) > qbinom(0.95, n(), 0.5)) |>
     ungroup() |>
-    preproc.iquizoo:::calc_sdt(by = id_cols()) |>
-    select(all_of(id_cols()), dprime)
+    preproc.iquizoo::nback(.by = id_cols())
 }
 preproc_threeback <- function(data) {
   data |>
     filter(!is.na(type)) |>
     mutate(
-      type = if_else(type == "match", "s", "n"),
+      type = if_else(type == "match", "same", "diff"),
       # no response means error
       acc = coalesce(acc, 0)
     ) |>
     group_by(across(all_of(id_cols()))) |>
     filter(sum(acc == 1) > qbinom(0.95, n(), 0.5)) |>
     ungroup() |>
-    preproc.iquizoo:::calc_sdt(by = id_cols()) |>
-    select(all_of(id_cols()), dprime)
+    preproc.iquizoo::nback(.by = id_cols())
 }
 
 preproc_spst <- function(data) {

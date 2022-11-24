@@ -29,8 +29,8 @@ static_branches <- tarchetypes::tar_map(
 )
 list(
   tarchetypes::tar_file_read(
-    task_indices,
-    "config/task_indices.csv",
+    indices_selection,
+    "config/indices_selection.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
   ),
   tarchetypes::tar_file_read(
@@ -84,15 +84,20 @@ list(
         indices_Raven
       ) |>
       left_join(sub_id_transform, by = c("sub_id" = "behav_id")) |>
-      mutate(sub_id = coalesce(fmri_id, sub_id), .keep = "unused") |>
-      semi_join(
-        filter(task_indices, selected),
+      mutate(sub_id = coalesce(fmri_id, sub_id), .keep = "unused")
+  ),
+  tar_target(
+    indices_filtered,
+    indices |>
+      inner_join(
+        filter(indices_selection, selected),
         by = c("task", "index")
-      )
+      ) |>
+      mutate(score_norm = if_else(reversed, -score, score))
   ),
   tar_target(
     indices_clean,
-    indices |>
+    indices_filtered |>
       group_by(disp_name, index) |>
       filter(!performance::check_outliers(score, method = "iqr")) |>
       ungroup()
@@ -104,7 +109,7 @@ list(
       pivot_wider(
         id_cols = sub_id,
         names_from = task_index,
-        values_from = score
+        values_from = score_norm
       )
   ),
   tar_target(
@@ -117,5 +122,6 @@ list(
   tar_target(
     mdl_data,
     select(indices_wider_clean, -sub_id)
-  )
+  ),
+  tarchetypes::tar_quarto(quarto_site)
 )

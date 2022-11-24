@@ -78,7 +78,7 @@ mdl_data |>
 #| fig-width: 8
 #| fig-height: 8
 #| fig-cap: "**Common Factor Model**"
-fit <- psych::fa(mdl_data, 4)
+fit <- psych::fa(mdl_data, 5)
 psych::fa.diagram(fit)
 ```
 :::
@@ -89,7 +89,7 @@ psych::fa.diagram(fit)
 #| fig-width: 8
 #| fig-height: 8
 #| fig-cap: "**Bi-Factor Model**"
-fit <- psych::omega(mdl_data, 4)
+fit <- psych::omega(mdl_data, 5, plot = FALSE)
 psych::omega.diagram(fit)
 ```
 :::
