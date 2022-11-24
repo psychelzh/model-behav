@@ -70,9 +70,18 @@ preproc_filtering <- function(data) {
       grp_id = as.integer(grp_id),
       filt_eff = n_distractor + lme4::fixef(fit)["n_distractor"]
     )
+  capacity <- data_clean |>
+    filter(n_distractor == 0) |>
+    group_by(grp_id, rotated) |>
+    summarise(
+      pc = mean(acc == 1),
+      .groups = "drop_last"
+    ) |>
+    summarise(k = 2 * sum(pc))
   data_clean |>
     distinct(across(all_of(c("grp_id", id_cols())))) |>
     inner_join(slopes, by = "grp_id") |>
+    inner_join(capacity, by = "grp_id") |>
     select(-grp_id)
 }
 
