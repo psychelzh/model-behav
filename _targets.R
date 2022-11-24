@@ -63,7 +63,7 @@ list(
     indices_Raven,
     preproc_existed(
       data_clean,
-      all_of(c(ranven_scoretest = "Raven2")),
+      all_of(c(Raven_score = "Raven2")),
       disp_name = "rapm"
     )
   ),
@@ -75,19 +75,19 @@ list(
       !!!.x,
       .id = "task"
     ) |>
-      left_join(sub_id_transform, by = c("sub_id" = "behav_id")) |>
-      mutate(sub_id = coalesce(fmri_id, sub_id), .keep = "unused") |>
       mutate(task = str_remove(task, "indices_")) |>
-      semi_join(
-        filter(task_indices, selected),
-        by = c("task", "index")
-      ) |>
       left_join(config, by = "task") |>
       select(-preproc) |>
       bind_rows(
         indices_keepTrack,
         indices_FM,
         indices_Raven
+      ) |>
+      left_join(sub_id_transform, by = c("sub_id" = "behav_id")) |>
+      mutate(sub_id = coalesce(fmri_id, sub_id), .keep = "unused") |>
+      semi_join(
+        filter(task_indices, selected),
+        by = c("task", "index")
       )
   )
 )
