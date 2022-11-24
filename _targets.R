@@ -1,5 +1,5 @@
 library(targets)
-tar_option_set(packages = "tidyverse")
+tar_option_set(packages = c("tidyverse", "umx"))
 tar_source()
 future::plan(future.callr::callr)
 config <- readr::read_csv("config/task_preproc.csv", show_col_types = FALSE) |>
@@ -123,5 +123,6 @@ list(
     mdl_data,
     select(indices_wider_clean, -sub_id)
   ),
-  tarchetypes::tar_quarto(quarto_site)
+  tarchetypes::tar_quarto(quarto_site),
+  tar_target(full_g_scores, calc_g_scores(indices_wider_clean))
 )
