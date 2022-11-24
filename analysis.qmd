@@ -15,18 +15,10 @@ execute:
 #| include: false
 
 library(tidyverse)
-targets::tar_load(indices)
-indices_clean <- indices |> 
-  group_by(disp_name) |> 
-  filter(!performance::check_outliers(score, method = "iqr")) |> 
-  ungroup()
-indices_wider <- indices_clean |> 
-  unite("task_index", disp_name, index, remove = FALSE) |> 
-  pivot_wider(
-    id_cols = sub_id,
-    names_from = disp_name,
-    values_from = score
-  )
+targets::tar_load(indices_clean)
+targets::tar_load(indices_wider)
+targets::tar_load(indices_wider_clean)
+targets::tar_load(mdl_data)
 ```
 
 # Data Inspection
@@ -43,7 +35,7 @@ indices_wider <- indices_clean |>
 indices_clean |> 
   ggplot(aes(score)) +
   geom_histogram() +
-  facet_wrap(~ disp_name, scales = "free")
+  facet_wrap(~ disp_name + index, scales = "free")
 ```
 
 ## Missing Pattern
@@ -60,21 +52,6 @@ indices_wider |>
   select(-sub_id) |> 
   naniar::vis_miss() +
   theme(axis.text.x = element_text(angle = 90))
-```
-
-```{r}
-#| label: rm-sub-too-much-miss
-
-# use {tidytable} locally, which is faster
-indices_wider_clean <- withr::with_package(
-  "tidytable",
-  indices_wider |> 
-    rowwise() |> 
-    # mutate(prop_miss = mean(is.na(c_across(-sub_id)))) |> 
-    filter(mean(is.na(c_across(-sub_id))) < 0.2) |>
-    ungroup()
-)
-mdl_data <- select(indices_wider_clean, -sub_id)
 ```
 
 # Model Building

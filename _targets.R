@@ -89,5 +89,33 @@ list(
         filter(task_indices, selected),
         by = c("task", "index")
       )
+  ),
+  tar_target(
+    indices_clean,
+    indices |>
+      group_by(disp_name, index) |>
+      filter(!performance::check_outliers(score, method = "iqr")) |>
+      ungroup()
+  ),
+  tar_target(
+    indices_wider,
+    indices_clean |>
+      unite("task_index", disp_name, index, remove = FALSE) |>
+      pivot_wider(
+        id_cols = sub_id,
+        names_from = task_index,
+        values_from = score
+      )
+  ),
+  tar_target(
+    indices_wider_clean,
+    indices_wider |>
+      rowwise() |>
+      filter(mean(is.na(c_across(-sub_id))) < 0.2) |>
+      ungroup()
+  ),
+  tar_target(
+    mdl_data,
+    select(indices_wider_clean, -sub_id)
   )
 )
