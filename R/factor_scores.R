@@ -5,5 +5,5 @@ calc_g_scores <- function(data, id_cols = "sub_id") {
 
 extract_g_scores <- function(data) {
   mdl <- umxEFA(as.data.frame(data), factors = "g")
-  umxFactorScores(mdl, type = "ML", minManifests = 3)
+  umxFactorScores(mdl, type = "WeightedML", minManifests = 3)
 }
