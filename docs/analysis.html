@@ -386,22 +386,24 @@ Liang Zhang
 </div>
 </div>
 </div>
+</section></section>
+<section>
+<section id="general-factor-scores-estimation" class="title-slide slide level1 center">
+<h1>General Factor Scores Estimation</h1>
+<p>We then proceed by sticking to one-factor model (exploratory factor analysis with one latent factor only). We want to find out the required number of variables for a stable g-factor scores estimation. So a number of simulations are done with different number of variables used to estimate g-factor scores. Those simulated g-factor scores are correlated with the g-factor scores from all-variable (21 variables in total) model.</p>
 </section>
-<section id="further-thoughts" class="slide level2">
-<h2>Further Thoughts</h2>
-<p>Some critical issues:</p>
-<ul>
-<li>Models with one latent factor only have poor model fitting.
-<ul>
-<li>Workaround: using bi-factor model and estimate general factor from the <code>g</code> factor.</li>
-</ul></li>
-<li>Subjects with missing values can be hard to estimate factor scores
-<ul>
-<li>Workaround: using CFA and full-information maximal likelihood method.</li>
-</ul></li>
-</ul>
+<section id="correlation-with-scores-of-all-variable-model" class="slide level2 smaller">
+<h2>Correlation with scores of all-variable model</h2>
+<div class="cell">
 
-<div class="footer footer-default">
+</div>
+
+<img data-src="analysis_files/figure-revealjs/fig-cor-dist-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;6: <strong>Correlation distribution of simulations with different number of selected variables.</strong> Each point is the correlation between estimated general factor scores from selected variables and those from all variables. Simulation was done with 3 to 18 (step of 3) variables. Note there are a number of negative correlations for 3 to 9 variable simulation.</p></section>
+<section id="absolute-correlations" class="slide level2">
+<h2>Absolute correlations</h2>
+
+
+<img data-src="analysis_files/figure-revealjs/fig-cor-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;7: <strong>Trending of absolute correlations</strong></p><div class="footer footer-default">
 
 </div>
 </section></section>

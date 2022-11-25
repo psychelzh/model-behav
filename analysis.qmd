@@ -96,11 +96,57 @@ psych::omega.diagram(fit)
 
 :::
 
-## Further Thoughts
+# General Factor Scores Estimation
 
-Some critical issues:
+We then proceed by sticking to one-factor model (exploratory factor analysis with one latent factor only). We want to find out the required number of variables for a stable g-factor scores estimation. So a number of simulations are done with different number of variables used to estimate g-factor scores. Those simulated g-factor scores are correlated with the g-factor scores from all-variable (21 variables in total) model.
 
-* Models with one latent factor only have poor model fitting.
-  - Workaround: using bi-factor model and estimate general factor from the `g` factor.
-* Subjects with missing values can be hard to estimate factor scores
-  - Workaround: using CFA and full-information maximal likelihood method.
+## Correlation with scores of all-variable model {.smaller}
+
+```{r}
+targets::tar_load(g_scores)
+targets::tar_load(full_g_scores)
+cor_sims <- g_scores |> 
+  left_join(rename(full_g_scores, full_g = g), by = "sub_id") |> 
+  group_by(across(c(num_vars, starts_with("tar")))) |> 
+  summarise(r = cor(g, full_g, use = "pairwise"), .groups = "drop")
+```
+
+```{r}
+#| label: fig-cor-dist
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Correlation distribution of simulations with different number of selected
+#|   variables.** Each point is the correlation between estimated general factor
+#|   scores from selected variables and those from all variables. Simulation was
+#|   done with 3 to 18 (step of 3) variables. Note there are a number of negative
+#|   correlations for 3 to 9 variable simulation.
+
+cor_sims |> 
+  ggplot(aes(num_vars, r)) +
+  ggdist::stat_dots() +
+  theme_bw() +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  labs(x = "Number of Variables", y = "Pearson's Correlation Coefficient")
+```
+
+## Absolute correlations
+
+```{r}
+#| label: fig-cor-trend
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Trending of absolute correlations**
+
+cor_sims |> 
+  mutate(abs_r = abs(r)) |> 
+  ggplot(aes(num_vars, abs_r)) +
+  stat_summary(geom = "ribbon", fun.data = mean_sdl, fill = "lightblue") +
+  stat_summary(geom = "point", fun = mean, fill = "white", color = "black") +
+  stat_summary(geom = "line", fun = mean) +
+  theme_bw() +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  labs(x = "Number of Variables", y = "Pearson's Correlation Coefficient")
+```
+

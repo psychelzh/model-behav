@@ -28,10 +28,17 @@
     "text": "The promising models\n\n\n\n\n\n\n\nFigure 4: Common Factor Model\n\n\n\n\n\n\n\n\n\n\nFigure 5: Bi-Factor Model"
   },
   {
-    "objectID": "analysis.html#further-thoughts",
-    "href": "analysis.html#further-thoughts",
+    "objectID": "analysis.html#correlation-with-scores-of-all-variable-model",
+    "href": "analysis.html#correlation-with-scores-of-all-variable-model",
     "title": "Behavior Analysis",
-    "section": "Further Thoughts",
-    "text": "Further Thoughts\nSome critical issues:\n\nModels with one latent factor only have poor model fitting.\n\nWorkaround: using bi-factor model and estimate general factor from the g factor.\n\nSubjects with missing values can be hard to estimate factor scores\n\nWorkaround: using CFA and full-information maximal likelihood method."
+    "section": "Correlation with scores of all-variable model",
+    "text": "Correlation with scores of all-variable model\n\n\n\n\nFigure 6: Correlation distribution of simulations with different number of selected variables. Each point is the correlation between estimated general factor scores from selected variables and those from all variables. Simulation was done with 3 to 18 (step of 3) variables. Note there are a number of negative correlations for 3 to 9 variable simulation."
+  },
+  {
+    "objectID": "analysis.html#absolute-correlations",
+    "href": "analysis.html#absolute-correlations",
+    "title": "Behavior Analysis",
+    "section": "Absolute correlations",
+    "text": "Absolute correlations\n\n\nFigure 7: Trending of absolute correlations"
   }
 ]
