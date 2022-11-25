@@ -1,7 +1,10 @@
 library(targets)
-tar_option_set(packages = c("tidyverse", "umx"))
+tar_option_set(
+  packages = c("tidyverse", "umx")
+)
 tar_source()
 future::plan(future.callr::callr)
+# for indices pre-processing
 config <- readr::read_csv("config/task_preproc.csv", show_col_types = FALSE) |>
   tidyr::drop_na() |>
   dplyr::mutate(preproc = rlang::syms(paste0("preproc_", preproc)))
@@ -27,6 +30,32 @@ static_branches <- tarchetypes::tar_map(
     tar_target(data_clean, screen_data(data))
   )
 )
+# for g score estimation
+hypers <- data.frame(num_vars = seq(3, 18, 3))
+factor_scores <- tarchetypes::tar_map(
+  hypers,
+  list(
+    tar_target(
+      g_scores,
+      map2_df(data, mdl, extract_g_scores) |>
+        add_column(num_vars = num_vars, .before = 1L),
+      pattern = map(data, mdl)
+    ),
+    tarchetypes::tar_rep(
+      data,
+      resample_data(indices_wider_clean, num_vars),
+      iteration = "list",
+      batches = 50,
+      reps = 10
+    ),
+    tar_target(
+      mdl,
+      map(data, build_model),
+      pattern = map(data)
+    )
+  )
+)
+
 list(
   tarchetypes::tar_file_read(
     indices_selection,
@@ -124,5 +153,17 @@ list(
     select(indices_wider_clean, -sub_id)
   ),
   tarchetypes::tar_quarto(quarto_site),
-  tar_target(full_g_scores, calc_g_scores(indices_wider_clean))
+  tar_target(
+    full_g_mdl,
+    build_model(indices_wider_clean)
+  ),
+  tar_target(
+    full_g_scores,
+    extract_g_scores(indices_wider_clean, full_g_mdl)
+  ),
+  factor_scores,
+  tarchetypes::tar_combine(
+    g_scores,
+    factor_scores[[1]]
+  )
 )
