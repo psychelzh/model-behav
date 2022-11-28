@@ -24,7 +24,7 @@ static_branches <- tarchetypes::tar_map(
     ),
     tarchetypes::tar_file_read(
       data,
-      fs::path("data", sprintf("%s.arrow", task)),
+      fs::path("data/behav", sprintf("%s.arrow", task)),
       read = arrow::read_feather(!!.x)
     ),
     tar_target(data_clean, screen_data(data))
@@ -69,7 +69,7 @@ list(
   ),
   tarchetypes::tar_file_read(
     data_clean,
-    "data/data_clean.csv",
+    "data/behav/data_clean.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
   ),
   tar_target(
