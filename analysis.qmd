@@ -103,15 +103,6 @@ We then proceed by sticking to one-factor model (exploratory factor analysis wit
 ## Correlation with scores of all-variable model {.smaller}
 
 ```{r}
-targets::tar_load(g_scores)
-targets::tar_load(full_g_scores)
-cor_sims <- g_scores |> 
-  left_join(rename(full_g_scores, full_g = g), by = "sub_id") |> 
-  group_by(across(c(num_vars, starts_with("tar")))) |> 
-  summarise(r = cor(g, full_g, use = "pairwise"), .groups = "drop")
-```
-
-```{r}
 #| label: fig-cor-dist
 #| fig-width: 8
 #| fig-height: 6
@@ -121,7 +112,7 @@ cor_sims <- g_scores |>
 #|   scores from selected variables and those from all variables. Simulation was
 #|   done with 3 to 18 (step of 3) variables. Note there are a number of negative
 #|   correlations for 3 to 9 variable simulation.
-
+targets::tar_load(cor_sims)
 cor_sims |> 
   ggplot(aes(num_vars, r)) +
   ggdist::stat_dots() +

@@ -23,3 +23,11 @@ extract_g_scores <- function(data, mdl, id_cols = "sub_id") {
     umxFactorScores(mdl, type = "WeightedML", minManifests = 1)
   )
 }
+
+correlate_full_g <- function(g_scores, full_g_scores) {
+  g_scores |>
+    bind_rows() |>
+    inner_join(rename(full_g_scores, full_g = g), by = "sub_id") |>
+    group_by(across(starts_with("tar"))) |>
+    summarise(r = cor(g, full_g, use = "pairwise"), .groups = "drop")
+}

@@ -1,6 +1,7 @@
 library(targets)
 tar_option_set(
-  packages = c("tidyverse", "umx")
+  packages = c("tidyverse", "umx"),
+  memory = "transient"
 )
 tar_source()
 future::plan(future.callr::callr)
@@ -8,7 +9,7 @@ future::plan(future.callr::callr)
 config <- readr::read_csv("config/task_preproc.csv", show_col_types = FALSE) |>
   tidyr::drop_na() |>
   dplyr::mutate(preproc = rlang::syms(paste0("preproc_", preproc)))
-static_branches <- tarchetypes::tar_map(
+load_data_behav <- tarchetypes::tar_map(
   config,
   names = task,
   list(
@@ -37,9 +38,12 @@ factor_scores <- tarchetypes::tar_map(
   list(
     tar_target(
       g_scores,
-      map2_df(data, mdl, extract_g_scores) |>
-        add_column(num_vars = num_vars, .before = 1L),
+      map2(data, mdl, extract_g_scores),
       pattern = map(data, mdl)
+    ),
+    tar_target(
+      cor_sims,
+      correlate_full_g(g_scores, full_g_scores)
     ),
     tarchetypes::tar_rep(
       data,
@@ -57,6 +61,7 @@ factor_scores <- tarchetypes::tar_map(
 )
 
 list(
+  tar_target(num_vars_used, hypers),
   tarchetypes::tar_file_read(
     indices_selection,
     "config/indices_selection.csv",
@@ -96,10 +101,10 @@ list(
       disp_name = "rapm"
     )
   ),
-  static_branches,
+  load_data_behav,
   tarchetypes::tar_combine(
     indices,
-    static_branches[[1]],
+    load_data_behav[[1]],
     command = bind_rows(
       !!!.x,
       .id = "task"
@@ -163,7 +168,24 @@ list(
   ),
   factor_scores,
   tarchetypes::tar_combine(
-    g_scores,
-    factor_scores[[1]]
+    cor_sims,
+    factor_scores[[2]],
+    command = bind_rows(!!!.x, .id = "name") |>
+      mutate(num_vars = parse_number(name), .keep = "unused")
+  ),
+  tarchetypes::tar_file_read(
+    neural_data,
+    "data/neural/fc_matrix.arrow",
+    read = arrow::read_feather(!!.x),
+    format = "qs"
+  ),
+  tar_target(
+    neural_full,
+    restore_full_fc(neural_data)
+  ),
+  tarchetypes::tar_file_read(
+    subjs_info,
+    "data/neural/subjs.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
   )
 )

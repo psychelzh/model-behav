@@ -32,7 +32,7 @@
     "href": "analysis.html#correlation-with-scores-of-all-variable-model",
     "title": "Behavior Analysis",
     "section": "Correlation with scores of all-variable model",
-    "text": "Correlation with scores of all-variable model\n\n\n\n\nFigure 6: Correlation distribution of simulations with different number of selected variables. Each point is the correlation between estimated general factor scores from selected variables and those from all variables. Simulation was done with 3 to 18 (step of 3) variables. Note there are a number of negative correlations for 3 to 9 variable simulation."
+    "text": "Correlation with scores of all-variable model\n\nFigure 6: Correlation distribution of simulations with different number of selected variables. Each point is the correlation between estimated general factor scores from selected variables and those from all variables. Simulation was done with 3 to 18 (step of 3) variables. Note there are a number of negative correlations for 3 to 9 variable simulation."
   },
   {
     "objectID": "analysis.html#absolute-correlations",
