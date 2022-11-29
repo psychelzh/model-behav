@@ -39,6 +39,13 @@
     "href": "analysis.html#absolute-correlations",
     "title": "Behavior Analysis",
     "section": "Absolute correlations",
-    "text": "Absolute correlations\n\n\nFigure 7: Trending of absolute correlations"
+    "text": "Absolute correlations\n\nFigure 7: Trending of absolute correlations"
+  },
+  {
+    "objectID": "analysis.html#neural-prediction-trend",
+    "href": "analysis.html#neural-prediction-trend",
+    "title": "Behavior Analysis",
+    "section": "Neural prediction trend",
+    "text": "Neural prediction trend\n\n\nFigure 8: Trending of neural prediction. Results are based on CPM."
   }
 ]

@@ -141,3 +141,30 @@ cor_sims |>
   labs(x = "Number of Variables", y = "Pearson's Correlation Coefficient")
 ```
 
+# CPM-based prediction
+
+Basically, we hypothesize that the more tasks we included for estimating g-factor scores, the neural prediction will be better.
+
+## Neural prediction trend 
+
+```{r}
+#| label: fig-cor-neural-trend
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Trending of neural prediction.** Results are based on CPM.
+
+targets::tar_load(cor_neural_samples)
+targets::tar_load(cor_neural_full)
+cor_neural_samples |> 
+  add_row(
+    num_vars = 21,
+    r = as.numeric(cor_neural_full$results[, "r"])
+  ) |> 
+  ggplot(aes(num_vars, r)) +
+  ggdist::stat_dotsinterval() +
+  theme_bw() +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  labs(x = "Number of Variables", y = "Neural Prediction (10-fold CV)")
+```
+
