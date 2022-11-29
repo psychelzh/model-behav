@@ -1,6 +1,7 @@
 library(targets)
+conflicted::conflict_prefer("desc", "dplyr", quiet = TRUE)
 tar_option_set(
-  packages = c("tidyverse", "umx"),
+  packages = c("tidyverse", "umx", "NetworkToolbox"),
   memory = "transient"
 )
 tar_source()
@@ -44,6 +45,48 @@ factor_scores <- tarchetypes::tar_map(
     tar_target(
       cor_sims,
       correlate_full_g(g_scores, full_g_scores)
+    ),
+    tar_target(
+      results_neural_overall_sample,
+      map_df(
+        cor_neural_overall_samples,
+        ~ if (!is.null(.)) {
+          . |>
+            pluck("results") |>
+            as_tibble() |>
+            transmute(r = as.numeric(r))
+        }
+      ),
+      pattern = map(cor_neural_overall_samples)
+    ),
+    tar_target(
+      cor_neural_overall, {
+        behav <- cor_sims |>
+          filter(row_number(abs(r)) == 0.5 * n()) |>
+          inner_join(
+            bind_rows(g_scores),
+            by = c("tar_batch", "tar_rep", "tar_seed")
+          )
+        correlate_neural(
+          behav, neural_full, subjs_info_merged,
+          connections = "overall"
+        )
+      }
+    ),
+    tar_target(
+      g_scores_samples,
+      sample(g_scores, 100)
+    ),
+    tar_target(
+      cor_neural_overall_samples,
+      map(
+        g_scores_samples,
+        correlate_neural,
+        neural_full = neural_full,
+        subjs_info_merged = subjs_info_merged,
+        connections = "overall"
+      ),
+      pattern = map(g_scores_samples)
     ),
     tarchetypes::tar_rep(
       data,
@@ -174,18 +217,37 @@ list(
       mutate(num_vars = parse_number(name), .keep = "unused")
   ),
   tarchetypes::tar_file_read(
-    neural_data,
-    "data/neural/fc_matrix.arrow",
-    read = arrow::read_feather(!!.x),
-    format = "qs"
-  ),
-  tar_target(
-    neural_full,
-    restore_full_fc(neural_data)
-  ),
-  tarchetypes::tar_file_read(
     subjs_info,
     "data/neural/subjs.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
+  ),
+  tarchetypes::tar_file_read(
+    neural_data,
+    "data/neural/fc_matrix.arrow",
+    read = as.matrix(arrow::read_feather(!!.x)),
+    format = "qs"
+  ),
+  tar_target(
+    subjs_info_merged,
+    match_subjs(subjs_info, indices_wider_clean)
+  ),
+  tar_target(
+    neural_full,
+    restore_full_fc(neural_data, subjs_info_merged),
+    format = "qs"
+  ),
+  tar_target(
+    cor_neural_full,
+    correlate_neural(
+      full_g_scores, neural_full,
+      subjs_info_merged,
+      connections = "overall"
+    )
+  ),
+  tarchetypes::tar_combine(
+    cor_neural_samples,
+    factor_scores[[3]],
+    command = bind_rows(!!!.x, .id = "num_vars") |>
+      mutate(num_vars = parse_number(num_vars))
   )
 )
