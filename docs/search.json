@@ -42,10 +42,24 @@
     "text": "Absolute correlations\n\nFigure 7: Trending of absolute correlations"
   },
   {
+    "objectID": "analysis.html#correlation-between-each-pair-of-g-factor-estimation",
+    "href": "analysis.html#correlation-between-each-pair-of-g-factor-estimation",
+    "title": "Behavior Analysis",
+    "section": "Correlation between each pair of g-factor estimation",
+    "text": "Correlation between each pair of g-factor estimation\n\nFigure 8: Trending of correlation between each pair of g-factor scores.\n\nIs it possible that with a larger sets of variables, the pattern will be different?\nNote the “reliability” of g-factor scores is relatively low for 10 variables."
+  },
+  {
+    "objectID": "analysis.html#predictive-network-overlapping",
+    "href": "analysis.html#predictive-network-overlapping",
+    "title": "Behavior Analysis",
+    "section": "Predictive Network Overlapping",
+    "text": "Predictive Network Overlapping\n\nFigure 9: Trending of the overlap between pairs of preditive networks. Results are based on CPM."
+  },
+  {
     "objectID": "analysis.html#neural-prediction-trend",
     "href": "analysis.html#neural-prediction-trend",
     "title": "Behavior Analysis",
-    "section": "Neural prediction trend",
-    "text": "Neural prediction trend\n\n\nFigure 8: Trending of neural prediction. Results are based on CPM."
+    "section": "Neural Prediction Trend",
+    "text": "Neural Prediction Trend\n\n\nFigure 10: Trending of neural prediction. Results are based on CPM."
   }
 ]

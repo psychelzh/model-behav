@@ -134,5 +134,25 @@ list(
     format = "qs"
   ),
   # targets_stability.R
-  factor_scores_stability
+  factor_scores_stability,
+  tarchetypes::tar_combine(
+    intra_cor_g_scores_pairs,
+    factor_scores_stability[[1]],
+    command = bind_rows(!!!.x, .id = "num_vars") |>
+      mutate(num_vars = parse_number(num_vars))
+  ),
+  tarchetypes::tar_combine(
+    dice_mask_pairs,
+    factor_scores_stability[[2]],
+    command = bind_rows(!!!.x, .id = "num_vars") |>
+      mutate(num_vars = parse_number(num_vars))
+  ),
+  tarchetypes::tar_combine(
+    pred_neural_pairs,
+    factor_scores_stability[[3]],
+    command = list(!!!.x) |>
+      map(~ bind_rows(., .id = "src")) |>
+      bind_rows(.id = "num_vars") |>
+      mutate(num_vars = parse_number(num_vars))
+  )
 )

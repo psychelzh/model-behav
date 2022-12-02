@@ -15,10 +15,6 @@ execute:
 #| include: false
 
 library(tidyverse)
-targets::tar_load(indices_clean)
-targets::tar_load(indices_wider)
-targets::tar_load(indices_wider_clean)
-mdl_data <- select(indices_wider_clean, -sub_id)
 ```
 
 # Data Inspection
@@ -32,6 +28,8 @@ mdl_data <- select(indices_wider_clean, -sub_id)
 #| fig-cap: >
 #|   **Distributions for All Tasks.** They are all all fairly distributed as 
 #|   normal.
+
+targets::tar_load(indices_clean)
 indices_clean |> 
   ggplot(aes(score)) +
   geom_histogram() +
@@ -48,6 +46,8 @@ indices_clean |>
 #|   **Misssing pattern.** Stop signal task has slightly more missing values.
 #|   Subjects with missing values at more than 20% of tasks are removed in
 #|   further analysis.
+
+targets::tar_load(indices_wider)
 indices_wider |> 
   select(-sub_id) |> 
   naniar::vis_miss() +
@@ -63,6 +63,9 @@ indices_wider |>
 #| fig-width: 8
 #| fig-height: 8
 #| fig-cap: "**Correlation Between Tasks**"
+
+targets::tar_load(indices_wider_clean)
+mdl_data <- select(indices_wider_clean, -sub_id)
 mdl_data |> 
   corrr::correlate() |> 
   corrr::autoplot()
@@ -141,11 +144,52 @@ cor_sims |>
   labs(x = "Number of Variables", y = "Pearson's Correlation Coefficient")
 ```
 
-# CPM-based prediction
+# Reliabilty of g factor scores
 
-Basically, we hypothesize that the more tasks we included for estimating g-factor scores, the neural prediction will be better.
+The more interesting question is the trends of reliability when number of variables is increasing. Here we draw pairs of non-overlap variables to demonstrate this.
 
-## Neural prediction trend 
+## Correlation between each pair of g-factor estimation
+
+```{r}
+#| label: fig-intr-cor-pairs-trend
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Trending of correlation between each pair of g-factor scores.**
+
+targets::tar_load(intra_cor_g_scores_pairs)
+intra_cor_g_scores_pairs |> 
+  ggplot(aes(num_vars, abs(r))) +
+  ggdist::stat_dotsinterval() +
+  theme_bw() +
+  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  labs(x = "Number of Variables", y = "Pearson's Correlation")
+```
+
+::: {.notes}
+* Is it possible that with a larger sets of variables, the pattern will be different?
+* Note the "reliability" of g-factor scores is relatively low for 10 variables.
+:::
+
+## Predictive Network Overlapping
+
+```{r}
+#| label: fig-dice-mask-trend
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Trending of the overlap between pairs of preditive networks.** Results 
+#|   are based on CPM.
+
+targets::tar_load(dice_mask_pairs)
+dice_mask_pairs |> 
+  ggplot(aes(num_vars, abs(dice_mask))) +
+  ggdist::stat_dotsinterval() +
+  theme_bw() +
+  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  labs(x = "Number of Variables", y = "Dice similarity")
+```
+## Neural Prediction Trend
 
 ```{r}
 #| label: fig-cor-neural-trend
@@ -154,17 +198,11 @@ Basically, we hypothesize that the more tasks we included for estimating g-facto
 #| fig-cap: >
 #|   **Trending of neural prediction.** Results are based on CPM.
 
-targets::tar_load(cor_neural_samples)
-targets::tar_load(cor_neural_full)
-cor_neural_samples |> 
-  add_row(
-    num_vars = 21,
-    r = as.numeric(cor_neural_full$results[, "r"])
-  ) |> 
+targets::tar_load(pred_neural_pairs)
+pred_neural_pairs |> 
   ggplot(aes(num_vars, r)) +
   ggdist::stat_dotsinterval() +
   theme_bw() +
-  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  scale_x_continuous(breaks = scales::breaks_width(1)) +
   labs(x = "Number of Variables", y = "Neural Prediction (10-fold CV)")
 ```
-
