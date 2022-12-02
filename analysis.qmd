@@ -1,5 +1,5 @@
 ---
-title: Behavior Analysis
+title: G-Factor Scores' Neural Predictability
 author: Liang Zhang
 date: 2022-11-17
 format: 
