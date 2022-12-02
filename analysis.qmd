@@ -18,7 +18,7 @@ library(tidyverse)
 targets::tar_load(indices_clean)
 targets::tar_load(indices_wider)
 targets::tar_load(indices_wider_clean)
-targets::tar_load(mdl_data)
+mdl_data <- select(indices_wider_clean, -sub_id)
 ```
 
 # Data Inspection

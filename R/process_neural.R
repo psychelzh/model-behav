@@ -2,13 +2,14 @@
 #'
 #' @title
 #' @param neural_data
-#' @param subjs_info_merged
+#' @param subset
 #' @return
 #' @author Liang Zhang
 #' @export
-restore_full_fc <- function(neural_data, subjs_info_merged) {
-  # discard non-matching data to reduce data size
-  neural_data <- neural_data[, subjs_info_merged$id]
+restore_full_fc <- function(neural_data, subset = NULL) {
+  if (!is.null(subset)) {
+    neural_data <- neural_data[, subset]
+  }
   # the answer to equation: n * (n - 1) / 2 = num_edges
   num_vars <- (sqrt((8 * nrow(neural_data)) + 1) + 1) / 2
   num_subjs <- ncol(neural_data)
@@ -39,32 +40,85 @@ match_subjs <- function(subjs_info, indices_wider_clean) {
     select(id, all_of(subj_vars))
 }
 
+#' Regress out co-variates
+#'
+#' @title
+#' @param neural_data
+#' @param subjs_info
+#' @param name_covars
+#' @return
+#' @author Liang Zhang
+#' @export
+regress_neural_covar <- function(neural_data, subjs_info,
+                                 name_covars = c("age", "gender", "scanner")) {
+  # discard non-matching data to reduce data size
+  neural_data <- neural_data[, subjs_info$id]
+  apply(
+    neural_data,
+    1,
+    \(x) {
+      with(
+        subjs_info,
+        str_c("x ~ ", str_c(name_covars, collapse = "+")) |>
+          as.formula() |>
+          lm() |>
+          resid()
+      )
+    }
+  ) |>
+    t()
+}
+regress_behav_covar <- function(g_scores, subjs_info,
+                                name_covars = c("age", "gender", "scanner")) {
+  data <- subjs_info |>
+    left_join(g_scores, by = "sub_id")
+  lm(
+    str_c("g ~ ", str_c(name_covars, collapse = "+")) |>
+      as.formula(),
+    data,
+    na.action = na.exclude
+  ) |>
+    resid()
+}
+
 #' Use CPM method to correlate to neural data
 #'
 #' @title
-#' @param g_scores
-#' @param neural_full
-#' @param subjs_info_merged
+#' @param behav
+#' @param neural
 #' @param ... Further arguments passed to [NetworkToolbox::cpmIV()].
 #' @return
 #' @author Liang Zhang
 #' @export
-correlate_neural <- function(g_scores, neural_full, subjs_info_merged, ...) {
-  behav <- subjs_info_merged |>
-    left_join(g_scores, by = "sub_id") |>
-    pull(g)
-  if (anyNA(behav)) {
-    return(NULL)
-  }
-  covars <- as.list(select(subjs_info_merged, age, gender, scanner))
+correlate_neural <- function(behav, neural, ...) {
+  # remove subjects with NA values (only from behavioral measures)
+  keep_subjs <- !is.na(behav)
   cpmIV(
-    neural_full,
-    behav,
+    neural[, , keep_subjs],
+    behav[keep_subjs],
     kfolds = 10,
-    # covar = covars,
     cores = 1,
     plots = FALSE,
     progBar = FALSE,
     ...
   )
+}
+
+extract_cpm_corcoef <- function(cpm) {
+  if (!is.null(cpm)) {
+    cpm |>
+      pluck("results") |>
+      as_tibble() |>
+      transmute(r = as.numeric(r))
+  }
+}
+
+calc_mask_simil <- function(cpm_pairs) {
+  map(cpm_pairs, "Mask") |>
+    map(~ .[upper.tri(.)]) |>
+    bind_cols() |>
+    t() |>
+    proxy::simil(method = "dice") |>
+    unclass() |>
+    as_tibble_col("dice_mask")
 }

@@ -2,109 +2,14 @@ library(targets)
 conflicted::conflict_prefer("desc", "dplyr", quiet = TRUE)
 tar_option_set(
   packages = c("tidyverse", "umx", "NetworkToolbox"),
-  memory = "transient"
+  memory = "transient",
+  garbage_collection = TRUE,
+  error = "null"
 )
 tar_source()
 future::plan(future.callr::callr)
-# for indices pre-processing
-config <- readr::read_csv("config/task_preproc.csv", show_col_types = FALSE) |>
-  tidyr::drop_na() |>
-  dplyr::mutate(preproc = rlang::syms(paste0("preproc_", preproc)))
-load_data_behav <- tarchetypes::tar_map(
-  config,
-  names = task,
-  list(
-    tar_target(
-      indices,
-      preproc(data_clean) |>
-        pivot_longer(
-          -any_of(id_cols()),
-          names_to = "index",
-          values_to = "score"
-        ) |>
-        select(-task_datetime)
-    ),
-    tarchetypes::tar_file_read(
-      data,
-      fs::path("data/behav", sprintf("%s.arrow", task)),
-      read = arrow::read_feather(!!.x)
-    ),
-    tar_target(data_clean, screen_data(data))
-  )
-)
-# for g score estimation
-hypers <- data.frame(num_vars = seq(3, 18, 3))
-factor_scores <- tarchetypes::tar_map(
-  hypers,
-  list(
-    tar_target(
-      g_scores,
-      map2(data, mdl, extract_g_scores),
-      pattern = map(data, mdl)
-    ),
-    tar_target(
-      cor_sims,
-      correlate_full_g(g_scores, full_g_scores)
-    ),
-    tar_target(
-      results_neural_overall_sample,
-      map_df(
-        cor_neural_overall_samples,
-        ~ if (!is.null(.)) {
-          . |>
-            pluck("results") |>
-            as_tibble() |>
-            transmute(r = as.numeric(r))
-        }
-      ),
-      pattern = map(cor_neural_overall_samples)
-    ),
-    tar_target(
-      cor_neural_overall, {
-        behav <- cor_sims |>
-          filter(row_number(abs(r)) == 0.5 * n()) |>
-          inner_join(
-            bind_rows(g_scores),
-            by = c("tar_batch", "tar_rep", "tar_seed")
-          )
-        correlate_neural(
-          behav, neural_full, subjs_info_merged,
-          connections = "overall"
-        )
-      }
-    ),
-    tar_target(
-      g_scores_samples,
-      sample(g_scores, 100)
-    ),
-    tar_target(
-      cor_neural_overall_samples,
-      map(
-        g_scores_samples,
-        correlate_neural,
-        neural_full = neural_full,
-        subjs_info_merged = subjs_info_merged,
-        connections = "overall"
-      ),
-      pattern = map(g_scores_samples)
-    ),
-    tarchetypes::tar_rep(
-      data,
-      resample_data(indices_wider_clean, num_vars),
-      iteration = "list",
-      batches = 50,
-      reps = 10
-    ),
-    tar_target(
-      mdl,
-      map(data, build_model),
-      pattern = map(data)
-    )
-  )
-)
 
 list(
-  tar_target(num_vars_used, hypers),
   tarchetypes::tar_file_read(
     indices_selection,
     "config/indices_selection.csv",
@@ -144,6 +49,7 @@ list(
       disp_name = "rapm"
     )
   ),
+  # targets_clean_behav.R
   load_data_behav,
   tarchetypes::tar_combine(
     indices,
@@ -163,22 +69,7 @@ list(
       left_join(sub_id_transform, by = c("sub_id" = "behav_id")) |>
       mutate(sub_id = coalesce(fmri_id, sub_id), .keep = "unused")
   ),
-  tar_target(
-    indices_filtered,
-    indices |>
-      inner_join(
-        filter(indices_selection, selected),
-        by = c("task", "index")
-      ) |>
-      mutate(score_norm = if_else(reversed, -score, score))
-  ),
-  tar_target(
-    indices_clean,
-    indices_filtered |>
-      group_by(disp_name, index) |>
-      filter(!performance::check_outliers(score, method = "iqr")) |>
-      ungroup()
-  ),
+  tar_target(indices_clean, clean_indices(indices, indices_selection)),
   tar_target(
     indices_wider,
     indices_clean |>
@@ -196,10 +87,6 @@ list(
       filter(mean(is.na(c_across(-sub_id))) < 0.2) |>
       ungroup()
   ),
-  tar_target(
-    mdl_data,
-    select(indices_wider_clean, -sub_id)
-  ),
   tarchetypes::tar_quarto(quarto_site),
   tar_target(
     full_g_mdl,
@@ -209,10 +96,11 @@ list(
     full_g_scores,
     extract_g_scores(indices_wider_clean, full_g_mdl)
   ),
-  factor_scores,
+  # targets_neural_prediction.R
+  neural_prediction,
   tarchetypes::tar_combine(
     cor_sims,
-    factor_scores[[2]],
+    neural_prediction[[2]],
     command = bind_rows(!!!.x, .id = "name") |>
       mutate(num_vars = parse_number(name), .keep = "unused")
   ),
@@ -233,21 +121,18 @@ list(
   ),
   tar_target(
     neural_full,
-    restore_full_fc(neural_data, subjs_info_merged),
+    restore_full_fc(neural_data, subjs_info_merged$id),
     format = "qs"
   ),
   tar_target(
-    cor_neural_full,
-    correlate_neural(
-      full_g_scores, neural_full,
-      subjs_info_merged,
-      connections = "overall"
-    )
+    neural_data_no_covar,
+    regress_neural_covar(neural_data, subjs_info_merged)
   ),
-  tarchetypes::tar_combine(
-    cor_neural_samples,
-    factor_scores[[3]],
-    command = bind_rows(!!!.x, .id = "num_vars") |>
-      mutate(num_vars = parse_number(num_vars))
-  )
+  tar_target(
+    neural_full_no_covar,
+    restore_full_fc(neural_data_no_covar),
+    format = "qs"
+  ),
+  # targets_stability.R
+  factor_scores_stability
 )

@@ -278,3 +278,15 @@ screen_data <- function(data) {
     ungroup() |>
     left_join(data, by = id_cols())
 }
+
+clean_indices <- function(indices, indices_selection) {
+  indices |>
+    inner_join(
+      filter(indices_selection, selected),
+      by = c("task", "index")
+    ) |>
+    mutate(score_norm = if_else(reversed, -score, score)) |>
+    group_by(disp_name, index) |>
+    filter(!performance::check_outliers(score, method = "iqr")) |>
+    ungroup()
+}
