@@ -290,3 +290,13 @@ clean_indices <- function(indices, indices_selection) {
     filter(!performance::check_outliers(score, method = "iqr")) |>
     ungroup()
 }
+
+reshape_data_wider <- function(indices) {
+  indices |>
+    unite("task_index", disp_name, index, remove = FALSE) |>
+    pivot_wider(
+      id_cols = sub_id,
+      names_from = task_index,
+      values_from = score_norm
+    )
+}

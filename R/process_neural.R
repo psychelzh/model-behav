@@ -68,12 +68,13 @@ regress_neural_covar <- function(neural_data, subjs_info,
   ) |>
     t()
 }
-regress_behav_covar <- function(g_scores, subjs_info,
+regress_behav_covar <- function(behav, subjs_info,
+                                name_resp = "g",
                                 name_covars = c("age", "gender", "scanner")) {
   data <- subjs_info |>
-    left_join(g_scores, by = "sub_id")
+    left_join(behav, by = "sub_id")
   lm(
-    str_c("g ~ ", str_c(name_covars, collapse = "+")) |>
+    str_c(name_resp, " ~ ", str_c(name_covars, collapse = "+")) |>
       as.formula(),
     data,
     na.action = na.exclude

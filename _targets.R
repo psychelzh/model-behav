@@ -72,14 +72,34 @@ list(
   ),
   tar_target(indices_clean, clean_indices(indices, indices_selection)),
   tar_target(
-    indices_wider,
-    indices_clean |>
-      unite("task_index", disp_name, index, remove = FALSE) |>
-      pivot_wider(
-        id_cols = sub_id,
-        names_from = task_index,
-        values_from = score_norm
+    indices_rapm,
+    clean_indices(
+      indices,
+      tribble(
+        ~task, ~index, ~selected, ~reversed,
+        "Raven", "score", TRUE, FALSE
       )
+    ) |>
+      reshape_data_wider()
+  ),
+  tar_target(
+    indices_rapm_no_covar,
+    regress_behav_covar(
+      indices_rapm, subjs_info_merged,
+      name_resp = "rapm_score"
+    )
+  ),
+  tar_target(
+    cpm_rapm,
+    correlate_neural(
+      indices_rapm_no_covar,
+      neural_full_no_covar,
+      connections = "overall"
+    )
+  ),
+  tar_target(
+    indices_wider,
+    reshape_data_wider(indices_clean)
   ),
   tar_target(
     indices_wider_clean,
@@ -96,6 +116,18 @@ list(
   tar_target(
     full_g_scores,
     extract_g_scores(indices_wider_clean, full_g_mdl)
+  ),
+  tar_target(
+    full_g_scores_no_covar,
+    regress_behav_covar(full_g_scores, subjs_info_merged)
+  ),
+  tar_target(
+    cpm_full_g,
+    correlate_neural(
+      full_g_scores_no_covar,
+      neural_full_no_covar,
+      connections = "overall"
+    )
   ),
   # targets_neural_prediction.R
   neural_prediction,
