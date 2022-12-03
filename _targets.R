@@ -4,7 +4,8 @@ tar_option_set(
   packages = c("tidyverse", "umx", "NetworkToolbox"),
   memory = "transient",
   garbage_collection = TRUE,
-  error = "null"
+  error = "null",
+  format = "qs"
 )
 tar_source()
 future::plan(future.callr::callr)
@@ -112,8 +113,7 @@ list(
   tarchetypes::tar_file_read(
     neural_data,
     "data/neural/fc_matrix.arrow",
-    read = as.matrix(arrow::read_feather(!!.x)),
-    format = "qs"
+    read = as.matrix(arrow::read_feather(!!.x))
   ),
   tar_target(
     subjs_info_merged,
@@ -121,8 +121,7 @@ list(
   ),
   tar_target(
     neural_full,
-    restore_full_fc(neural_data, subjs_info_merged$id),
-    format = "qs"
+    restore_full_fc(neural_data, subjs_info_merged$id)
   ),
   tar_target(
     neural_data_no_covar,
@@ -130,8 +129,7 @@ list(
   ),
   tar_target(
     neural_full_no_covar,
-    restore_full_fc(neural_data_no_covar),
-    format = "qs"
+    restore_full_fc(neural_data_no_covar)
   ),
   # targets_stability.R
   factor_scores_stability,
