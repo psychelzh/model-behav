@@ -1,7 +1,6 @@
 library(targets)
-conflicted::conflict_prefer("desc", "dplyr", quiet = TRUE)
 tar_option_set(
-  packages = c("tidyverse", "umx", "NetworkToolbox"),
+  packages = c("tidyverse", "umx", "NetworkToolbox", "conflicted"),
   memory = "transient",
   garbage_collection = TRUE,
   error = "null",
@@ -9,7 +8,6 @@ tar_option_set(
 )
 tar_source()
 future::plan(future.callr::callr)
-
 list(
   tarchetypes::tar_file_read(
     indices_selection,
