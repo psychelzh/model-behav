@@ -24,6 +24,14 @@ factor_scores_stability <- tarchetypes::tar_map(
       pattern = map(cpm_pairs)
     ),
     tar_target(
+      cor_sims_pairs,
+      map(
+        g_scores_pairs,
+        correlate_full_g_pairs,
+        full_g_scores = full_g_scores
+      )
+    ),
+    tar_target(
       cpm_pairs,
       map(
         g_scores_pairs_no_cover,

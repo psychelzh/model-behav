@@ -66,3 +66,14 @@ extract_g_scores_pairs <- function(data, mdl, id_cols = "sub_id") {
   }
   scores
 }
+
+correlate_full_g_pairs <- function(g_scores_pairs, full_g_scores) {
+  map_at(
+    g_scores_pairs,
+    c("first", "second"),
+    ~ . |>
+      inner_join(rename(full_g_scores, full_g = g), by = "sub_id") |>
+      summarise(r = cor(g, full_g, use = "pairwise"))
+  ) |>
+    bind_rows(.id = "part")
+}

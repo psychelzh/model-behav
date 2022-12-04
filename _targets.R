@@ -130,7 +130,13 @@ list(
   # targets_neural_prediction.R
   neural_prediction,
   tarchetypes::tar_combine(
-    cor_sims,
+    pred_neural_single,
+    neural_prediction[[1]],
+    command = bind_rows(!!!.x, .id = "num_vars") |>
+      mutate(num_vars = parse_number(num_vars))
+  ),
+  tarchetypes::tar_combine(
+    cor_sims_single,
     neural_prediction[[2]],
     command = bind_rows(!!!.x, .id = "name") |>
       mutate(num_vars = parse_number(name), .keep = "unused")
@@ -182,5 +188,21 @@ list(
       map(~ bind_rows(., .id = "src")) |>
       bind_rows(.id = "num_vars") |>
       mutate(num_vars = parse_number(num_vars))
+  ),
+  tarchetypes::tar_combine(
+    cor_sims_pairs,
+    factor_scores_stability[[4]],
+    command = list(!!!.x) |>
+      map(~ bind_rows(., .id = "src")) |>
+      bind_rows(.id = "num_vars") |>
+      mutate(num_vars = parse_number(num_vars))
+  ),
+  tar_target(
+    cor_sims,
+    bind_rows(cor_sims_pairs, cor_sims_single)
+  ),
+  tar_target(
+    pred_neural,
+    bind_rows(pred_neural_pairs, pred_neural_single)
   )
 )

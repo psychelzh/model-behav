@@ -198,9 +198,11 @@ dice_mask_pairs |>
 #| fig-cap: >
 #|   **Trending of neural prediction.** Results are based on CPM.
 
-targets::tar_load(pred_neural_pairs)
-pred_neural_pairs |> 
+targets::tar_load(pred_neural)
+pred_rapm <- targets::tar_read(cpm_rapm)$results[, "r"]
+pred_neural |> 
   ggplot(aes(num_vars, r)) +
+  geom_hline(yintercept = pred_rapm, linetype = "dotted", color = "red") +
   ggdist::stat_dotsinterval() +
   theme_bw() +
   scale_x_continuous(breaks = scales::breaks_width(1)) +
