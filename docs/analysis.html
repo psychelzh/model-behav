@@ -390,16 +390,16 @@ Liang Zhang
 <section>
 <section id="general-factor-scores-estimation" class="title-slide slide level1 center">
 <h1>General Factor Scores Estimation</h1>
-<p>We then proceed by sticking to one-factor model (exploratory factor analysis with one latent factor only). We want to find out the required number of variables for a stable g-factor scores estimation. So a number of simulations are done with different number of variables used to estimate g-factor scores. Those simulated g-factor scores are correlated with the g-factor scores from all-variable (21 variables in total) model.</p>
+<p>We then proceed by sticking to one-factor model (exploratory factor analysis with one latent factor only). We want to find out the required number of variables for a stable g-factor scores estimation. So a number of simulations are done with different number of variables used to estimate g-factor scores. Those simulated g-factor scores are correlated with the g-factor scores from all-variable (20 variables in total) model.</p>
 </section>
 <section id="correlation-with-scores-of-all-variable-model" class="slide level2 smaller">
 <h2>Correlation with scores of all-variable model</h2>
 
-<img data-src="analysis_files/figure-revealjs/fig-cor-dist-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;6: <strong>Correlation distribution of simulations with different number of selected variables.</strong> Each point is the correlation between estimated general factor scores from selected variables and those from all variables. Simulation was done with 3 to 18 (step of 3) variables. Note there are a number of negative correlations for 3 to 9 variable simulation.</p></section>
-<section id="absolute-correlations" class="slide level2">
-<h2>Absolute correlations</h2>
+<img data-src="analysis_files/figure-revealjs/fig-cor-dist-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;6: <strong>Correlation distribution of simulations with different number of selected variables.</strong> Each point is the correlation between estimated general factor scores from selected variables and those from all 20 variables. Note there are a number of negative correlations for 3 to 9 variable simulation.</p></section>
+<section id="correlation-with-rapm" class="slide level2">
+<h2>Correlation with RAPM</h2>
 
-<img data-src="analysis_files/figure-revealjs/fig-cor-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;7: <strong>Trending of absolute correlations</strong></p></section></section>
+<img data-src="analysis_files/figure-revealjs/fig-cor-rapm-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;7: <strong>Correlation with RAPM scores for each simulation.</strong> The dotted red line the result of g scores estimated from all variables. Note there are negative correlations for simulations with 3-9.</p></section></section>
 <section>
 <section id="reliabilty-of-g-factor-scores" class="title-slide slide level1 center">
 <h1>Reliabilty of g factor scores</h1>
@@ -427,16 +427,134 @@ Liang Zhang
 </section>
 <section id="predictive-network-overlapping" class="slide level2">
 <h2>Predictive Network Overlapping</h2>
+<div class="columns">
+<div class="column">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-dice-mask-trend" class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="analysis_files/figure-revealjs/fig-dice-mask-trend-1.png" width="576"></p>
+<p></p><figcaption>Figure&nbsp;9: <strong>Trending of the overlap between pairs of preditive networks.</strong> Results are based on CPM.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-dice-mask-trend-pos-only" class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="analysis_files/figure-revealjs/fig-dice-mask-trend-pos-only-1.png" width="576"></p>
+<p></p><figcaption>Figure&nbsp;10: <strong>Trending of the overlap between pairs of preditive networks.</strong> Only include positive intra-pair correlation simulations.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="neural-prediction-based-on-cpm" class="slide level2">
+<h2>Neural Prediction Based on CPM</h2>
 
-<img data-src="analysis_files/figure-revealjs/fig-dice-mask-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;9: <strong>Trending of the overlap between pairs of preditive networks.</strong> Results are based on CPM.</p></section>
-<section id="neural-prediction-trend" class="slide level2">
-<h2>Neural Prediction Trend</h2>
+<img data-src="analysis_files/figure-revealjs/fig-cor-neural-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;11: <strong>Trending of neural prediction.</strong> Results are based on CPM. The red dotted line is the result from Raven score. The green dotted line is the result of factor scores estimated from all variables.</p></section>
+<section id="prediction-by-global-efficiency" class="slide level2">
+<h2>Prediction by global efficiency</h2>
 
+<img data-src="analysis_files/figure-revealjs/fig-cor-glob-eff-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;12: <strong>Trending of global efficiency prediction.</strong> Basically, the global efficiency can not predict these g scores. The red dotted line is the result from Raven score. The green dotted line is the result of factor scores estimated from all variables.</p></section></section>
+<section>
+<section id="predictive-networks" class="title-slide slide level1 center">
+<h1>Predictive Networks</h1>
 
-<img data-src="analysis_files/figure-revealjs/fig-cor-neural-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;10: <strong>Trending of neural prediction.</strong> Results are based on CPM.</p><div class="footer footer-default">
-
+</section>
+<section id="absolute-edge-counts" class="slide level2">
+<h2>Absolute Edge Counts</h2>
+<div class="columns">
+<div class="column">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-g-counts" class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="analysis_files/figure-revealjs/fig-g-counts-1.png" width="576"></p>
+<p></p><figcaption>Figure&nbsp;13: <strong>Chord Diagram of Networks predict g-factor scores.</strong> Link width corresponds to the number of edges.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-raven-counts" class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="analysis_files/figure-revealjs/fig-raven-counts-1.png" width="576"></p>
+<p></p><figcaption>Figure&nbsp;14: <strong>Chord Diagram of Networks predict Raven scores.</strong> Link width corresponds to the number of edges.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="relative-edge-counts" class="slide level2">
+<h2>Relative Edge Counts</h2>
+<div class="columns">
+<div class="column">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-g-relative" class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="analysis_files/figure-revealjs/fig-g-relative-1.png" width="576"></p>
+<p></p><figcaption>Figure&nbsp;15: <strong>Chord Diagram of Networks predict g-factor scores.</strong> Link width corresponds to the relative number of edges (divided by total edges).</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-raven-relative" class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="analysis_files/figure-revealjs/fig-raven-relative-1.png" width="576"></p>
+<p></p><figcaption>Figure&nbsp;16: <strong>Chord Diagram of Networks predict Raven scores.</strong> Link width corresponds to the relative number of edges (divided by total edges).</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="nodes-summary" class="slide level2">
+<h2>Nodes Summary</h2>
+<div id="fig-brainnet" class="quarto-layout-panel">
+<figure>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matlab/brainnet_full_g.png"></p>
+<p></p><figcaption>Brain Network for G-scores</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matlab/brainnet_rapm.png"></p>
+<p></p><figcaption>Brain Network for RAPM</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption>Figure&nbsp;17: Brain Network View</figcaption><p></p>
+</figure>
 </div>
 </section></section>
+<section id="references" class="title-slide slide level1 center">
+<h1>References</h1>
+
+<div class="footer footer-default">
+
+</div>
+</section>
     </div>
   </div>
 

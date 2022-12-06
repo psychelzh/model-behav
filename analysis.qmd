@@ -2,10 +2,10 @@
 title: G-Factor Scores' Neural Predictability
 author: Liang Zhang
 date: 2022-11-17
-format: 
+format:
   revealjs:
     code-fold: false
-execute: 
+execute:
   warning: false
   message: false
 ---
@@ -15,6 +15,7 @@ execute:
 #| include: false
 
 library(tidyverse)
+library(circlize)
 ```
 
 # Data Inspection
@@ -26,11 +27,11 @@ library(tidyverse)
 #| fig-width: 8
 #| fig-height: 6
 #| fig-cap: >
-#|   **Distributions for All Tasks.** They are all all fairly distributed as 
+#|   **Distributions for All Tasks.** They are all all fairly distributed as
 #|   normal.
 
 targets::tar_load(indices_clean)
-indices_clean |> 
+indices_clean |>
   ggplot(aes(score)) +
   geom_histogram() +
   facet_wrap(~ disp_name + index, scales = "free")
@@ -48,8 +49,8 @@ indices_clean |>
 #|   further analysis.
 
 targets::tar_load(indices_wider)
-indices_wider |> 
-  select(-sub_id) |> 
+indices_wider |>
+  select(-sub_id) |>
   naniar::vis_miss() +
   theme(axis.text.x = element_text(angle = 90))
 ```
@@ -66,42 +67,42 @@ indices_wider |>
 
 targets::tar_load(indices_wider_clean)
 mdl_data <- select(indices_wider_clean, -sub_id)
-mdl_data |> 
-  corrr::correlate() |> 
+mdl_data |>
+  corrr::correlate() |>
   corrr::autoplot()
 ```
 
 ## The promising models
 
-:::: {.columns}
-
-::: {.column}
+::: columns
+::: column
 ```{r}
 #| label: fig-common-fac
 #| fig-width: 8
 #| fig-height: 8
 #| fig-cap: "**Common Factor Model**"
+
 fit <- psych::fa(mdl_data, 5)
 psych::fa.diagram(fit)
 ```
 :::
 
-::: {.column}
+::: column
 ```{r}
 #| label: fig-bifac
 #| fig-width: 8
 #| fig-height: 8
 #| fig-cap: "**Bi-Factor Model**"
+
 fit <- psych::omega(mdl_data, 5, plot = FALSE)
 psych::omega.diagram(fit)
 ```
 :::
-
 :::
 
 # General Factor Scores Estimation
 
-We then proceed by sticking to one-factor model (exploratory factor analysis with one latent factor only). We want to find out the required number of variables for a stable g-factor scores estimation. So a number of simulations are done with different number of variables used to estimate g-factor scores. Those simulated g-factor scores are correlated with the g-factor scores from all-variable (21 variables in total) model.
+We then proceed by sticking to one-factor model (exploratory factor analysis with one latent factor only). We want to find out the required number of variables for a stable g-factor scores estimation. So a number of simulations are done with different number of variables used to estimate g-factor scores. Those simulated g-factor scores are correlated with the g-factor scores from all-variable (20 variables in total) model.
 
 ## Correlation with scores of all-variable model {.smaller}
 
@@ -112,36 +113,42 @@ We then proceed by sticking to one-factor model (exploratory factor analysis wit
 #| fig-cap: >
 #|   **Correlation distribution of simulations with different number of selected
 #|   variables.** Each point is the correlation between estimated general factor
-#|   scores from selected variables and those from all variables. Simulation was
-#|   done with 3 to 18 (step of 3) variables. Note there are a number of negative
-#|   correlations for 3 to 9 variable simulation.
+#|   scores from selected variables and those from all 20 variables. Note there
+#|   are a number of negative correlations for 3 to 9 variable simulation.
+
 targets::tar_load(cor_sims)
-cor_sims |> 
-  ggplot(aes(num_vars, r)) +
-  ggdist::stat_dots() +
+cor_sims |>
+  ggplot(aes(num_vars, abs(r))) +
+  ggdist::stat_dotsinterval() +
   theme_bw() +
-  scale_x_continuous(breaks = scales::breaks_width(3)) +
-  labs(x = "Number of Variables", y = "Pearson's Correlation Coefficient")
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  labs(x = "Number of Variables", y = "Absolute Pearson's Correlation Coefficient")
 ```
 
-## Absolute correlations
+## Correlation with RAPM
 
 ```{r}
-#| label: fig-cor-trend
+#| label: fig-cor-rapm
 #| fig-width: 8
 #| fig-height: 6
 #| fig-cap: >
-#|   **Trending of absolute correlations**
+#|   **Correlation with RAPM scores for each simulation.** The dotted red line
+#|   the result of g scores estimated from all variables. Note there are
+#|   negative correlations for simulations with 3-9.
 
-cor_sims |> 
-  mutate(abs_r = abs(r)) |> 
-  ggplot(aes(num_vars, abs_r)) +
-  stat_summary(geom = "ribbon", fun.data = mean_sdl, fill = "lightblue") +
-  stat_summary(geom = "point", fun = mean, fill = "white", color = "black") +
-  stat_summary(geom = "line", fun = mean) +
+targets::tar_load(cor_rapm)
+cor_rapm_full_g <- targets::tar_read(full_g_scores) |>
+  inner_join(targets::tar_read(indices_rapm), by = "sub_id") |>
+  summarise(r = cor(g, rapm_score)) |>
+  pull(r)
+cor_rapm |>
+  ggplot(aes(num_vars, abs(r))) +
+  ggdist::stat_dotsinterval() +
   theme_bw() +
-  scale_x_continuous(breaks = scales::breaks_width(3)) +
-  labs(x = "Number of Variables", y = "Pearson's Correlation Coefficient")
+  geom_hline(yintercept = cor_rapm_full_g, linetype = "dotted", color = "red") +
+  annotate("text", x = 5, y = cor_rapm_full_g, label = "All variabls included") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  labs(x = "Number of Variables", y = "Absolute Pearson's Correlation Coefficient")
 ```
 
 # Reliabilty of g factor scores
@@ -158,53 +165,256 @@ The more interesting question is the trends of reliability when number of variab
 #|   **Trending of correlation between each pair of g-factor scores.**
 
 targets::tar_load(intra_cor_g_scores_pairs)
-intra_cor_g_scores_pairs |> 
+intra_cor_g_scores_pairs |>
   ggplot(aes(num_vars, abs(r))) +
   ggdist::stat_dotsinterval() +
   theme_bw() +
-  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
   labs(x = "Number of Variables", y = "Pearson's Correlation")
 ```
 
-::: {.notes}
-* Is it possible that with a larger sets of variables, the pattern will be different?
-* Note the "reliability" of g-factor scores is relatively low for 10 variables.
+::: notes
+-   Is it possible that with a larger sets of variables, the pattern will be different?
+-   Note the "reliability" of g-factor scores is relatively low for 10 variables.
 :::
 
 ## Predictive Network Overlapping
 
+::: columns
+::: column
 ```{r}
 #| label: fig-dice-mask-trend
-#| fig-width: 8
+#| fig-width: 6
 #| fig-height: 6
 #| fig-cap: >
-#|   **Trending of the overlap between pairs of preditive networks.** Results 
+#|   **Trending of the overlap between pairs of preditive networks.** Results
 #|   are based on CPM.
 
 targets::tar_load(dice_mask_pairs)
-dice_mask_pairs |> 
+dice_mask_pairs |>
   ggplot(aes(num_vars, abs(dice_mask))) +
   ggdist::stat_dotsinterval() +
   theme_bw() +
-  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
   labs(x = "Number of Variables", y = "Dice similarity")
 ```
-## Neural Prediction Trend
+:::
+
+::: column
+```{r}
+#| label: fig-dice-mask-trend-pos-only
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: >
+#|   **Trending of the overlap between pairs of preditive networks.** Only
+#|   include positive intra-pair correlation simulations.
+
+intra_cor_g_scores_pairs |>
+  add_column(dice_mask = dice_mask_pairs$dice_mask) |>
+  filter(r > 0) |>
+  ggplot(aes(num_vars, abs(dice_mask))) +
+  ggdist::stat_dotsinterval() +
+  theme_bw() +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  labs(x = "Number of Variables", y = "Dice similarity")
+```
+:::
+:::
+
+## Neural Prediction Based on CPM
 
 ```{r}
 #| label: fig-cor-neural-trend
 #| fig-width: 8
 #| fig-height: 6
 #| fig-cap: >
-#|   **Trending of neural prediction.** Results are based on CPM.
+#|   **Trending of neural prediction.** Results are based on CPM. The red dotted
+#|   line is the result from Raven score. The green dotted line is the result of
+#|   factor scores estimated from all variables.
 
 targets::tar_load(pred_neural)
 pred_rapm <- targets::tar_read(cpm_rapm)$results[, "r"]
-pred_neural |> 
+pred_full_g <- as.numeric(targets::tar_read(cpm_full_g)$results[, "r"])
+pred_neural |>
   ggplot(aes(num_vars, r)) +
-  geom_hline(yintercept = pred_rapm, linetype = "dotted", color = "red") +
   ggdist::stat_dotsinterval() +
+  geom_hline(yintercept = pred_rapm, linetype = "dotted", color = "red") +
+  annotate("text", x = 16, y = pred_rapm, label = "Raven", color = "red") +
+  geom_hline(yintercept = pred_full_g, linetype = "dotted", color = "green") +
+  annotate("text", x = 16, y = pred_full_g, label = "All variables", color = "green") +
   theme_bw() +
-  scale_x_continuous(breaks = scales::breaks_width(1)) +
-  labs(x = "Number of Variables", y = "Neural Prediction (10-fold CV)")
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  labs(x = "Number of Variables", y = "CPM correlation (10-fold CV)")
 ```
+
+## Prediction by global efficiency
+
+```{r}
+#| label: fig-cor-glob-eff-trend
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Trending of global efficiency prediction.** Basically, the global
+#|   efficiency can not predict these g scores. The red dotted line is the
+#|   result from Raven score. The green dotted line is the result of factor
+#|   scores estimated from all variables.
+
+targets::tar_load(pred_efficiencies)
+pred_rapm <- targets::tar_read(pred_efficiency_rapm)$estimate
+pred_full_g <- targets::tar_read(pred_efficiency_full_g)$estimate
+pred_efficiencies |>
+  ggplot(aes(num_vars, estimate)) +
+  ggdist::stat_dotsinterval() +
+  geom_hline(yintercept = pred_rapm, linetype = "dotted", color = "red") +
+  annotate("text", x = 16, y = pred_rapm, label = "Raven", color = "red") +
+  geom_hline(yintercept = pred_full_g, linetype = "dotted", color = "green") +
+  annotate("text", x = 16, y = pred_full_g, label = "All variables", color = "green") +
+  theme_bw() +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  labs(x = "Number of Variables", y = "Pearson's Correlation")
+```
+
+# Predictive Networks
+
+```{r}
+#| label: prepare-parcel
+#| include: false
+
+targets::tar_load(cpm_full_g)
+targets::tar_load(cpm_rapm)
+parcel_labels <- readxl::read_excel("config/power264.atlas.xlsx", na = "N/A") |>
+  select(index = node, label)
+parcellation <- brainGraph::power264 |>
+  inner_join(parcel_labels, by = "index")
+prepare_mask <- function(mask, parcellation, normalize = TRUE) {
+  colnames(mask) <- seq_len(ncol(mask))
+  network_summary <- mask |>
+    as_tibble(.name_repair = "minimal") |>
+    mutate(from = seq_len(n()), .before = 1L) |>
+    pivot_longer(
+      -from,
+      names_to = "to",
+      names_transform = parse_integer,
+      values_to = "value"
+    ) |>
+    filter(from >= to) |>
+    mutate(
+      from = parcellation$label[from],
+      to = parcellation$label[to]
+    ) |>
+    drop_na() |>
+    group_by(from, to) |>
+    summarise(value = sum(value), .groups = "drop") |>
+    filter(value != 0)
+  if (normalize) {
+    edge_counts <- expand_grid(
+      from = 1:nrow(parcellation),
+      to = 1:nrow(parcellation)
+    ) |>
+      filter(from >= to) |>
+      mutate(
+        from = parcellation$label[from],
+        to = parcellation$label[to]
+      ) |>
+      group_by(from, to) |>
+      summarise(n_edge = n(), .groups = "drop")
+    network_summary <- network_summary |>
+      left_join(edge_counts, by = c("from", "to")) |>
+      mutate(value = value / n_edge, .keep = "unused")
+  }
+  network_summary
+}
+plot_chord <- function(network, main, option = "D") {
+  map <- viridisLite::viridis.map[viridisLite::viridis.map$opt == option, ]
+  map_cols <- grDevices::rgb(map$R, map$G, map$B)
+  rng_val <- range(network$value)
+  col_fun <- colorRamp2(
+    seq(rng_val[1], rng_val[[2]], length.out = length(map_cols)),
+    map_cols,
+    transparency = 0.5
+  )
+  chordDiagram(
+    network,
+    col = col_fun,
+    annotationTrack = c("name", "grid"),
+    annotationTrackHeight = c(0.03, 0.01)
+  )
+  title(main = main)
+}
+```
+
+## Absolute Edge Counts
+
+::: columns
+::: column
+```{r}
+#| label: fig-g-counts
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: >
+#|   **Chord Diagram of Networks predict g-factor scores.** Link width
+#|   corresponds to the number of edges.
+
+network <- prepare_mask(cpm_full_g$Mask, parcellation, normalize = FALSE)
+plot_chord(network, main = "G-factor Scores")
+```
+:::
+
+::: column
+```{r}
+#| label: fig-raven-counts
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: >
+#|   **Chord Diagram of Networks predict Raven scores.** Link width
+#|   corresponds to the number of edges.
+
+network <- prepare_mask(cpm_rapm$Mask, parcellation, normalize = FALSE)
+plot_chord(network, main = "Raven Scores")
+```
+:::
+:::
+
+## Relative Edge Counts
+
+::: columns
+::: column
+```{r}
+#| label: fig-g-relative
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: >
+#|   **Chord Diagram of Networks predict g-factor scores.** Link width
+#|   corresponds to the relative number of edges (divided by total edges).
+
+network <- prepare_mask(cpm_full_g$Mask, parcellation, normalize = TRUE)
+plot_chord(network, main = "G-factor Scores")
+```
+:::
+
+::: column
+```{r}
+#| label: fig-raven-relative
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: >
+#|   **Chord Diagram of Networks predict Raven scores.** Link width
+#|   corresponds to the relative number of edges (divided by total edges).
+
+network <- prepare_mask(cpm_rapm$Mask, parcellation, normalize = TRUE)
+plot_chord(network, main = "Raven Scores")
+```
+:::
+:::
+
+## Nodes Summary
+
+::: {#fig-brainnet layout-ncol="2"}
+![Brain Network for G-scores](matlab/brainnet_full_g.png)
+
+![Brain Network for RAPM](matlab/brainnet_rapm.png)
+
+Brain Network View
+:::
+
+# References
