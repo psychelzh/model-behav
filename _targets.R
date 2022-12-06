@@ -96,6 +96,15 @@ list(
     )
   ),
   tar_target(
+    pred_efficiency_rapm,
+    correlate_efficiency(
+      indices_rapm,
+      global_efficencies,
+      subjs_info_merged,
+      name_behav = "rapm_score"
+    )
+  ),
+  tar_target(
     indices_wider,
     reshape_data_wider(indices_clean)
   ),
@@ -106,7 +115,6 @@ list(
       filter(mean(is.na(c_across(-sub_id))) < 0.2) |>
       ungroup()
   ),
-  tarchetypes::tar_quarto(quarto_site),
   tar_target(
     full_g_mdl,
     build_model(indices_wider_clean)
@@ -127,19 +135,14 @@ list(
       connections = "overall"
     )
   ),
-  # targets_neural_prediction.R
-  neural_prediction,
-  tarchetypes::tar_combine(
-    pred_neural_single,
-    neural_prediction[[1]],
-    command = bind_rows(!!!.x, .id = "num_vars") |>
-      mutate(num_vars = parse_number(num_vars))
-  ),
-  tarchetypes::tar_combine(
-    cor_sims_single,
-    neural_prediction[[2]],
-    command = bind_rows(!!!.x, .id = "name") |>
-      mutate(num_vars = parse_number(name), .keep = "unused")
+  tar_target(
+    pred_efficiency_full_g,
+    correlate_efficiency(
+      full_g_scores,
+      global_efficencies,
+      subjs_info_merged,
+      name_behav = "g"
+    )
   ),
   tarchetypes::tar_file_read(
     subjs_info,
@@ -160,12 +163,49 @@ list(
     restore_full_fc(neural_data, subjs_info_merged$id)
   ),
   tar_target(
+    network_adjencies,
+    threshold_networks(
+      neural_full, include_negative = TRUE,
+      thresh = "proportional", a = 0.15
+    )
+  ),
+  tar_target(
+    global_efficencies,
+    calc_efficencies(network_adjencies)
+  ),
+  tar_target(
     neural_data_no_covar,
     regress_neural_covar(neural_data, subjs_info_merged)
   ),
   tar_target(
     neural_full_no_covar,
     restore_full_fc(neural_data_no_covar)
+  ),
+  # targets_neural_prediction.R
+  neural_prediction,
+  tarchetypes::tar_combine(
+    pred_neural_single,
+    neural_prediction[[1]],
+    command = bind_rows(!!!.x, .id = "num_vars") |>
+      mutate(num_vars = parse_number(num_vars))
+  ),
+  tarchetypes::tar_combine(
+    cor_sims_single,
+    neural_prediction[[2]],
+    command = bind_rows(!!!.x, .id = "name") |>
+      mutate(num_vars = parse_number(name), .keep = "unused")
+  ),
+  tarchetypes::tar_combine(
+    pred_efficiencies_single,
+    neural_prediction[[3]],
+    command = bind_rows(!!!.x, .id = "name") |>
+      mutate(num_vars = parse_number(name), .keep = "unused")
+  ),
+  tarchetypes::tar_combine(
+    cor_rapm_single,
+    neural_prediction[[4]],
+    command = bind_rows(!!!.x, .id = "name") |>
+      mutate(num_vars = parse_number(name), .keep = "unused")
   ),
   # targets_stability.R
   factor_scores_stability,
@@ -197,6 +237,22 @@ list(
       bind_rows(.id = "num_vars") |>
       mutate(num_vars = parse_number(num_vars))
   ),
+  tarchetypes::tar_combine(
+    pred_efficiencies_pairs,
+    factor_scores_stability[[5]],
+    command = list(!!!.x) |>
+      map(~ bind_rows(., .id = "src")) |>
+      bind_rows(.id = "num_vars") |>
+      mutate(num_vars = parse_number(num_vars))
+  ),
+  tarchetypes::tar_combine(
+    cor_rapm_pairs,
+    factor_scores_stability[[6]],
+    command = list(!!!.x) |>
+      map(~ bind_rows(., .id = "src")) |>
+      bind_rows(.id = "num_vars") |>
+      mutate(num_vars = parse_number(num_vars))
+  ),
   tar_target(
     cor_sims,
     bind_rows(cor_sims_pairs, cor_sims_single)
@@ -204,5 +260,14 @@ list(
   tar_target(
     pred_neural,
     bind_rows(pred_neural_pairs, pred_neural_single)
-  )
+  ),
+  tar_target(
+    pred_efficiencies,
+    bind_rows(pred_efficiencies_pairs, pred_efficiencies_single)
+  ),
+  tar_target(
+    cor_rapm,
+    bind_rows(cor_rapm_pairs, cor_rapm_single)
+  ),
+  tarchetypes::tar_quarto(quarto_site)
 )

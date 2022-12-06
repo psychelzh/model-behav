@@ -46,6 +46,14 @@ correlate_full_g <- function(g_scores, full_g_scores) {
     summarise(r = cor(g, full_g, use = "pairwise"), .groups = "drop")
 }
 
+correlate_rapm <- function(g_scores, indices_rapm) {
+  g_scores |>
+    bind_rows() |>
+    inner_join(indices_rapm, by = "sub_id") |>
+    group_by(across(starts_with("tar"))) |>
+    summarise(r = cor(g, rapm_score, use = "pairwise"), .groups = "drop")
+}
+
 # special for paired analysis
 extract_pairs_cor <- function(g_scores_pairs) {
   g_scores_pairs |>
@@ -74,6 +82,17 @@ correlate_full_g_pairs <- function(g_scores_pairs, full_g_scores) {
     ~ . |>
       inner_join(rename(full_g_scores, full_g = g), by = "sub_id") |>
       summarise(r = cor(g, full_g, use = "pairwise"))
+  ) |>
+    bind_rows(.id = "part")
+}
+
+correlate_rapm_pairs <- function(g_scores_pairs, indices_rapm) {
+  map_at(
+    g_scores_pairs,
+    c("first", "second"),
+    ~ . |>
+      inner_join(indices_rapm, by = "sub_id") |>
+      summarise(r = cor(g, rapm_score, use = "pairwise"))
   ) |>
     bind_rows(.id = "part")
 }

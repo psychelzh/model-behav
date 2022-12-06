@@ -23,6 +23,42 @@ restore_full_fc <- function(neural_data, subset = NULL) {
   res
 }
 
+#' Threshold networks
+#'
+#' @title
+#' @param neural_full
+#' @param ... Arguments passed to [threshold()].
+#' @param include_negative
+#' @return
+#' @author Liang Zhang
+#' @export
+threshold_networks <- function(neural_full, ..., include_negative = FALSE) {
+  adjacencies <- array(dim = dim(neural_full))
+  for (i_sub in seq_len(dim(neural_full)[3])) {
+    neural_data <- neural_full[, , i_sub]
+    if (!include_negative) {
+      neural_data[neural_data < 0] <- 0
+    }
+    adjacencies[, , i_sub] <- binarize(threshold(neural_data, ...)$A)
+  }
+  adjacencies
+}
+
+#' Calculate global efficiency for each network
+#'
+#' @param network_adjencies
+#' @return
+#' @author Liang Zhang
+#' @export
+calc_efficencies <- function(network_adjencies) {
+  array_branch(network_adjencies, 3) |>
+    map_dbl(
+      ~ . |>
+        igraph::graph_from_adjacency_matrix() |>
+        brainGraph::efficiency(type = "global")
+    )
+}
+
 #' Match subjects from neural and behavioral data
 #'
 #' @title
@@ -102,6 +138,20 @@ correlate_neural <- function(behav, neural, ...) {
     plots = FALSE,
     progBar = FALSE,
     ...
+  )
+}
+
+correlate_efficiency <- function(behav, efficiency, subjs_info,
+                                 name_behav = "g",
+                                 name_covars = c("age", "gender", "scanner")) {
+  data <- subjs_info |>
+    add_column(efficiency = efficiency) |>
+    left_join(behav, by = "sub_id") |>
+    drop_na()
+  ppcor::pcor.test(
+    data[[name_behav]],
+    data$efficiency,
+    as.matrix(data[, name_covars])
   )
 }
 

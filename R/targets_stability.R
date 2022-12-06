@@ -32,6 +32,25 @@ factor_scores_stability <- tarchetypes::tar_map(
       )
     ),
     tar_target(
+      pred_efficiencies_pairs,
+      map(
+        g_scores_pairs,
+        do_pairs,
+        .fun = correlate_efficiency,
+        efficiency = global_efficencies,
+        subjs_info = subjs_info_merged,
+        .bind = TRUE
+      )
+    ),
+    tar_target(
+      cor_rapm_pairs,
+      map(
+        g_scores_pairs,
+        correlate_rapm_pairs,
+        indices_rapm = indices_rapm
+      )
+    ),
+    tar_target(
       cpm_pairs,
       map(
         g_scores_pairs_no_cover,

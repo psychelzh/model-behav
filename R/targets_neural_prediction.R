@@ -13,6 +13,19 @@ neural_prediction <- tarchetypes::tar_map(
       correlate_full_g(g_scores, full_g_scores)
     ),
     tar_target(
+      pred_efficiencies,
+      map_df(
+        g_scores,
+        correlate_efficiency,
+        efficiency = global_efficencies,
+        subjs_info = subjs_info_merged
+      )
+    ),
+    tar_target(
+      cor_rapm,
+      correlate_rapm(g_scores, indices_rapm)
+    ),
+    tar_target(
       g_scores,
       map2(data, mdl, extract_g_scores),
       pattern = map(data, mdl)
