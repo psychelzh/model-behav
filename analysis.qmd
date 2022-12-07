@@ -8,6 +8,7 @@ format:
 execute:
   warning: false
   message: false
+bibliography: references.bib
 ---
 
 ```{r}
@@ -17,6 +18,40 @@ execute:
 library(tidyverse)
 library(circlize)
 ```
+
+# G-Factor Revisited
+
+::: incremental
+-   G-Factor is first proposed by Spearman [-@spearman1904] to account for the positive manifold of cognitive tests.
+
+-   Studies showed structural [@deary2010, @jung2007] and functional [@neubauer2009, @vandenheuvel2009] brain features is highly predictable g-factor, especially for functional brain studies, g-factor is posited as a network property of brain.
+
+-   But g-factor is estimated by factor analysis among a set of cognitive tasks
+
+    -   Which tasks to include? The influence of individual tasks remain to be clarified.
+
+    -   How many tasks to include? Is it just the more, the better?
+:::
+
+## Data for current study
+
+```{r}
+#| label: describe-sample
+#| include: false
+
+targets::tar_load(indices_wider_clean)
+targets::tar_load(subjs_info)
+targets::tar_load(subjs_info_merged)
+part_str <- subjs_info_merged |> 
+  mutate(gender = factor(gender, 1:2, c("male", "female"))) |> 
+  report::report_participants()
+```
+
+-   A large sample size of college student was used to deal with these questions
+
+    -   Behavior sample: `r nrow(indices_wider_clean)`
+
+    -   Brain sample: `r part_str`
 
 # Data Inspection
 
@@ -151,7 +186,7 @@ cor_rapm |>
   labs(x = "Number of Variables", y = "Absolute Pearson's Correlation Coefficient")
 ```
 
-# Reliabilty of g factor scores
+# Reliability of g factor scores
 
 The more interesting question is the trends of reliability when number of variables is increasing. Here we draw pairs of non-overlap variables to demonstrate this.
 
@@ -177,6 +212,10 @@ intra_cor_g_scores_pairs |>
 -   Is it possible that with a larger sets of variables, the pattern will be different?
 -   Note the "reliability" of g-factor scores is relatively low for 10 variables.
 :::
+
+## Connectome-based Predictive Modeling (CPM)
+
+![**Schematic of CPM**](images/method-cpm.png){#fig-method-cpm fig-align="center"}
 
 ## Predictive Network Overlapping
 
@@ -247,6 +286,56 @@ pred_neural |>
   labs(x = "Number of Variables", y = "CPM correlation (10-fold CV)")
 ```
 
+## Predictability of Single Tasks (CPM)
+
+::: columns
+::: column
+```{r}
+#| label: fig-cor-single-tasks
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: >
+#|   **Comparison of neural predictability of single tasks.** Results are based on CPM.
+
+targets::tar_load(pred_neural_single_task)
+pred_neural_single_task |> 
+  ggplot(aes(fct_reorder(variable, r), r)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = "", y = "Pearson's Correlation") +
+  theme_bw()
+```
+:::
+
+::: column
+```{r}
+#| label: fig-loading-vs-predictability
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: >
+#|   **Relation between factor loading and predictability.**
+
+targets::tar_read(full_g_mdl) |> 
+  umx::loadings() |> 
+  as_tibble(rownames = "variable") |> 
+  inner_join(pred_neural_single_task, by = "variable") |> 
+  ggplot(aes(g, r)) +
+  geom_point() +
+  ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p"))) +
+  labs(x = "Loading", y = "Predictability") +
+  theme_bw()
+```
+:::
+:::
+
+## Global Efficiency
+
+A very famous network measure is [the global efficiency](https://en.wikipedia.org/wiki/Efficiency_(network_science)):
+
+$$E(G)=\frac{1}{N(N-1)}\sum_{i\neq j\in V}\frac{1}{d_{ij}}$$
+
+where $d_{ij}$ is the distance between nodes $i$ and $j$, $N$ is total number of nodes.
+
 ## Prediction by global efficiency
 
 ```{r}
@@ -273,6 +362,48 @@ pred_efficiencies |>
   scale_x_continuous(breaks = scales::breaks_width(2)) +
   labs(x = "Number of Variables", y = "Pearson's Correlation")
 ```
+
+## Predictability of Single Tasks (Global Efficiency)
+
+::: columns
+::: column
+```{r}
+#| label: fig-cor-single-tasks-eff
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: >
+#|   **Comparison of efficiency predictability of single tasks.**
+
+targets::tar_load(pred_efficiency_single_task)
+pred_efficiency_single_task |> 
+  ggplot(aes(fct_reorder(variable, r), r)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = "", y = "Pearson's Correlation") +
+  theme_bw()
+```
+:::
+
+::: column
+```{r}
+#| label: fig-loading-vs-predictability-eff
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: >
+#|   **Relation between factor loading and predictability.**
+
+targets::tar_read(full_g_mdl) |> 
+  umx::loadings() |> 
+  as_tibble(rownames = "variable") |> 
+  inner_join(pred_efficiency_single_task, by = "variable") |> 
+  ggplot(aes(g, r)) +
+  geom_point() +
+  ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p"))) +
+  labs(x = "Loading", y = "Predictability") +
+  theme_bw()
+```
+:::
+:::
 
 # Predictive Networks
 
@@ -410,9 +541,9 @@ plot_chord(network, main = "Raven Scores")
 ## Nodes Summary
 
 ::: {#fig-brainnet layout-ncol="2"}
-![Brain Network for G-scores](matlab/brainnet_full_g.png)
+![Brain Network for G-scores](images/brainnet_full_g.png){#fig-brain-g-scores}
 
-![Brain Network for RAPM](matlab/brainnet_rapm.png)
+![Brain Network for RAPM](images/brainnet_rapm.png){#fig-brain-rapm}
 
 Brain Network View
 :::
