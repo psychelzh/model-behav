@@ -9,6 +9,7 @@ execute:
   warning: false
   message: false
 bibliography: references.bib
+csl: modified-chicago.csl
 ---
 
 ```{r}
@@ -19,7 +20,7 @@ library(tidyverse)
 library(circlize)
 ```
 
-# G-Factor Revisited  {.smaller}
+# G-Factor Revisited {.smaller}
 
 ::: incremental
 -   G-Factor is first proposed by Spearman [-@spearman1904] to account for the positive manifold of cognitive tests.
@@ -33,6 +34,16 @@ library(circlize)
     -   How many tasks to include? Is it just the more, the better?
 :::
 
+## One g is consistent
+
+::: {#fig-g-consistency layout-ncol="2"}
+![Consistency between g estimated from three batteries [@johnson2004]](images/one-g-three-battery.png){alt="Consistency between g estimated from three batteries" width="500" height="500"}
+
+![Consistency between g estimated from five batteries [@johnson2008]](images/one-g-five-battery.png){width="500" height="500"}
+
+Consistency between g factors estimated from batteries
+:::
+
 ## Data for current study
 
 ```{r}
@@ -42,8 +53,8 @@ library(circlize)
 targets::tar_load(indices_wider_clean)
 targets::tar_load(subjs_info)
 targets::tar_load(subjs_info_merged)
-part_str <- subjs_info_merged |> 
-  mutate(gender = factor(gender, 1:2, c("male", "female"))) |> 
+part_str <- subjs_info_merged |>
+  mutate(gender = factor(gender, 1:2, c("male", "female"))) |>
   report::report_participants()
 ```
 
@@ -298,7 +309,7 @@ pred_neural |>
 #|   **Comparison of neural predictability of single tasks.** Results are based on CPM.
 
 targets::tar_load(pred_neural_single_task)
-pred_neural_single_task |> 
+pred_neural_single_task |>
   ggplot(aes(fct_reorder(variable, r), r)) +
   geom_col() +
   coord_flip() +
@@ -315,10 +326,10 @@ pred_neural_single_task |>
 #| fig-cap: >
 #|   **Relation between factor loading and predictability.**
 
-targets::tar_read(full_g_mdl) |> 
-  umx::loadings() |> 
-  as_tibble(rownames = "variable") |> 
-  inner_join(pred_neural_single_task, by = "variable") |> 
+targets::tar_read(full_g_mdl) |>
+  umx::loadings() |>
+  as_tibble(rownames = "variable") |>
+  inner_join(pred_neural_single_task, by = "variable") |>
   ggplot(aes(g, r)) +
   geom_point() +
   ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p"))) +
@@ -375,7 +386,7 @@ pred_efficiencies |>
 #|   **Comparison of efficiency predictability of single tasks.**
 
 targets::tar_load(pred_efficiency_single_task)
-pred_efficiency_single_task |> 
+pred_efficiency_single_task |>
   ggplot(aes(fct_reorder(variable, r), r)) +
   geom_col() +
   coord_flip() +
@@ -392,10 +403,10 @@ pred_efficiency_single_task |>
 #| fig-cap: >
 #|   **Relation between factor loading and predictability.**
 
-targets::tar_read(full_g_mdl) |> 
-  umx::loadings() |> 
-  as_tibble(rownames = "variable") |> 
-  inner_join(pred_efficiency_single_task, by = "variable") |> 
+targets::tar_read(full_g_mdl) |>
+  umx::loadings() |>
+  as_tibble(rownames = "variable") |>
+  inner_join(pred_efficiency_single_task, by = "variable") |>
   ggplot(aes(g, r)) +
   geom_point() +
   ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p"))) +

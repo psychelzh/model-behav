@@ -1,5 +1,12 @@
 [
   {
+    "objectID": "analysis.html#one-g-is-consistent",
+    "href": "analysis.html#one-g-is-consistent",
+    "title": "G-Factor Scores’ Neural Predictability",
+    "section": "One g is consistent",
+    "text": "One g is consistent\n\n\n\n\n\n\n\nConsistency between g estimated from three batteries (Johnson, 2004)\n\n\n\n\n\n\n\nConsistency between g estimated from five batteries (Johnson, 2008)\n\n\n\n\nFigure 1: Consistency between g factors estimated from batteries"
+  },
+  {
     "objectID": "analysis.html#data-for-current-study",
     "href": "analysis.html#data-for-current-study",
     "title": "G-Factor Scores’ Neural Predictability",
@@ -11,77 +18,77 @@
     "href": "analysis.html#distributions",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Distributions",
-    "text": "Distributions\n\nFigure 1: Distributions for All Tasks. They are all all fairly distributed as normal."
+    "text": "Distributions\n\nFigure 2: Distributions for All Tasks. They are all all fairly distributed as normal."
   },
   {
     "objectID": "analysis.html#missing-pattern",
     "href": "analysis.html#missing-pattern",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Missing Pattern",
-    "text": "Missing Pattern\n\nFigure 2: Misssing pattern. Stop signal task has slightly more missing values. Subjects with missing values at more than 20% of tasks are removed in further analysis."
+    "text": "Missing Pattern\n\nFigure 3: Misssing pattern. Stop signal task has slightly more missing values. Subjects with missing values at more than 20% of tasks are removed in further analysis."
   },
   {
     "objectID": "analysis.html#correlation-matrix",
     "href": "analysis.html#correlation-matrix",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Correlation Matrix",
-    "text": "Correlation Matrix\n\nFigure 3: Correlation Between Tasks"
+    "text": "Correlation Matrix\n\nFigure 4: Correlation Between Tasks"
   },
   {
     "objectID": "analysis.html#the-promising-models",
     "href": "analysis.html#the-promising-models",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "The promising models",
-    "text": "The promising models\n\n\n\n\n\n\n\nFigure 4: Common Factor Model\n\n\n\n\n\n\n\n\n\n\nFigure 5: Bi-Factor Model"
+    "text": "The promising models\n\n\n\n\n\n\n\nFigure 5: Common Factor Model\n\n\n\n\n\n\n\n\n\n\nFigure 6: Bi-Factor Model"
   },
   {
     "objectID": "analysis.html#correlation-with-scores-of-all-variable-model",
     "href": "analysis.html#correlation-with-scores-of-all-variable-model",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Correlation with scores of all-variable model",
-    "text": "Correlation with scores of all-variable model\n\nFigure 6: Correlation distribution of simulations with different number of selected variables. Each point is the correlation between estimated general factor scores from selected variables and those from all 20 variables. Note there are a number of negative correlations for 3 to 9 variable simulation."
+    "text": "Correlation with scores of all-variable model\n\nFigure 7: Correlation distribution of simulations with different number of selected variables. Each point is the correlation between estimated general factor scores from selected variables and those from all 20 variables. Note there are a number of negative correlations for 3 to 9 variable simulation."
   },
   {
     "objectID": "analysis.html#correlation-with-rapm",
     "href": "analysis.html#correlation-with-rapm",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Correlation with RAPM",
-    "text": "Correlation with RAPM\n\nFigure 7: Correlation with RAPM scores for each simulation. The dotted red line the result of g scores estimated from all variables. Note there are negative correlations for simulations with 3-9."
+    "text": "Correlation with RAPM\n\nFigure 8: Correlation with RAPM scores for each simulation. The dotted red line the result of g scores estimated from all variables. Note there are negative correlations for simulations with 3-9."
   },
   {
     "objectID": "analysis.html#correlation-between-each-pair-of-g-factor-estimation",
     "href": "analysis.html#correlation-between-each-pair-of-g-factor-estimation",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Correlation between each pair of g-factor estimation",
-    "text": "Correlation between each pair of g-factor estimation\n\nFigure 8: Trending of correlation between each pair of g-factor scores.\n\nIs it possible that with a larger sets of variables, the pattern will be different?\nNote the “reliability” of g-factor scores is relatively low for 10 variables."
+    "text": "Correlation between each pair of g-factor estimation\n\nFigure 9: Trending of correlation between each pair of g-factor scores.\n\nIs it possible that with a larger sets of variables, the pattern will be different?\nNote the “reliability” of g-factor scores is relatively low for 10 variables."
   },
   {
     "objectID": "analysis.html#connectome-based-predictive-modeling-cpm",
     "href": "analysis.html#connectome-based-predictive-modeling-cpm",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Connectome-based Predictive Modeling (CPM)",
-    "text": "Connectome-based Predictive Modeling (CPM)\n\nFigure 9: Schematic of CPM"
+    "text": "Connectome-based Predictive Modeling (CPM)\n\nFigure 10: Schematic of CPM"
   },
   {
     "objectID": "analysis.html#predictive-network-overlapping",
     "href": "analysis.html#predictive-network-overlapping",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Predictive Network Overlapping",
-    "text": "Predictive Network Overlapping\n\n\n\n\n\n\n\nFigure 10: Trending of the overlap between pairs of preditive networks. Results are based on CPM.\n\n\n\n\n\n\n\n\n\n\nFigure 11: Trending of the overlap between pairs of preditive networks. Only include positive intra-pair correlation simulations."
+    "text": "Predictive Network Overlapping\n\n\n\n\n\n\n\nFigure 11: Trending of the overlap between pairs of preditive networks. Results are based on CPM.\n\n\n\n\n\n\n\n\n\n\nFigure 12: Trending of the overlap between pairs of preditive networks. Only include positive intra-pair correlation simulations."
   },
   {
     "objectID": "analysis.html#neural-prediction-based-on-cpm",
     "href": "analysis.html#neural-prediction-based-on-cpm",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Neural Prediction Based on CPM",
-    "text": "Neural Prediction Based on CPM\n\nFigure 12: Trending of neural prediction. Results are based on CPM. The red dotted line is the result from Raven score. The green dotted line is the result of factor scores estimated from all variables."
+    "text": "Neural Prediction Based on CPM\n\nFigure 13: Trending of neural prediction. Results are based on CPM. The red dotted line is the result from Raven score. The green dotted line is the result of factor scores estimated from all variables."
   },
   {
     "objectID": "analysis.html#predictability-of-single-tasks-cpm",
     "href": "analysis.html#predictability-of-single-tasks-cpm",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Predictability of Single Tasks (CPM)",
-    "text": "Predictability of Single Tasks (CPM)\n\n\n\n\n\n\n\nFigure 13: Comparison of neural predictability of single tasks. Results are based on CPM.\n\n\n\n\n\n\n\n\n\n\nFigure 14: Relation between factor loading and predictability."
+    "text": "Predictability of Single Tasks (CPM)\n\n\n\n\n\n\n\nFigure 14: Comparison of neural predictability of single tasks. Results are based on CPM.\n\n\n\n\n\n\n\n\n\n\nFigure 15: Relation between factor loading and predictability."
   },
   {
     "objectID": "analysis.html#global-efficiency",
@@ -95,34 +102,34 @@
     "href": "analysis.html#prediction-by-global-efficiency",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Prediction by global efficiency",
-    "text": "Prediction by global efficiency\n\nFigure 15: Trending of global efficiency prediction. Basically, the global efficiency can not predict these g scores. The red dotted line is the result from Raven score. The green dotted line is the result of factor scores estimated from all variables."
+    "text": "Prediction by global efficiency\n\nFigure 16: Trending of global efficiency prediction. Basically, the global efficiency can not predict these g scores. The red dotted line is the result from Raven score. The green dotted line is the result of factor scores estimated from all variables."
   },
   {
     "objectID": "analysis.html#predictability-of-single-tasks-global-efficiency",
     "href": "analysis.html#predictability-of-single-tasks-global-efficiency",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Predictability of Single Tasks (Global Efficiency)",
-    "text": "Predictability of Single Tasks (Global Efficiency)\n\n\n\n\n\n\n\nFigure 16: Comparison of efficiency predictability of single tasks.\n\n\n\n\n\n\n\n\n\n\nFigure 17: Relation between factor loading and predictability."
+    "text": "Predictability of Single Tasks (Global Efficiency)\n\n\n\n\n\n\n\nFigure 17: Comparison of efficiency predictability of single tasks.\n\n\n\n\n\n\n\n\n\n\nFigure 18: Relation between factor loading and predictability."
   },
   {
     "objectID": "analysis.html#absolute-edge-counts",
     "href": "analysis.html#absolute-edge-counts",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Absolute Edge Counts",
-    "text": "Absolute Edge Counts\n\n\n\n\n\n\n\nFigure 18: Chord Diagram of Networks predict g-factor scores. Link width corresponds to the number of edges.\n\n\n\n\n\n\n\n\n\n\nFigure 19: Chord Diagram of Networks predict Raven scores. Link width corresponds to the number of edges."
+    "text": "Absolute Edge Counts\n\n\n\n\n\n\n\nFigure 19: Chord Diagram of Networks predict g-factor scores. Link width corresponds to the number of edges.\n\n\n\n\n\n\n\n\n\n\nFigure 20: Chord Diagram of Networks predict Raven scores. Link width corresponds to the number of edges."
   },
   {
     "objectID": "analysis.html#relative-edge-counts",
     "href": "analysis.html#relative-edge-counts",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Relative Edge Counts",
-    "text": "Relative Edge Counts\n\n\n\n\n\n\n\nFigure 20: Chord Diagram of Networks predict g-factor scores. Link width corresponds to the relative number of edges (divided by total edges).\n\n\n\n\n\n\n\n\n\n\nFigure 21: Chord Diagram of Networks predict Raven scores. Link width corresponds to the relative number of edges (divided by total edges)."
+    "text": "Relative Edge Counts\n\n\n\n\n\n\n\nFigure 21: Chord Diagram of Networks predict g-factor scores. Link width corresponds to the relative number of edges (divided by total edges).\n\n\n\n\n\n\n\n\n\n\nFigure 22: Chord Diagram of Networks predict Raven scores. Link width corresponds to the relative number of edges (divided by total edges)."
   },
   {
     "objectID": "analysis.html#nodes-summary",
     "href": "analysis.html#nodes-summary",
     "title": "G-Factor Scores’ Neural Predictability",
     "section": "Nodes Summary",
-    "text": "Nodes Summary\n\n\n\n\n\n\n\n(a) Brain Network for G-scores\n\n\n\n\n\n\n\n(b) Brain Network for RAPM\n\n\n\n\nFigure 22: Brain Network View"
+    "text": "Nodes Summary\n\n\n\n\n\n\n\n(a) Brain Network for G-scores\n\n\n\n\n\n\n\n(b) Brain Network for RAPM\n\n\n\n\nFigure 23: Brain Network View"
   }
 ]
