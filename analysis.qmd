@@ -19,12 +19,12 @@ library(tidyverse)
 library(circlize)
 ```
 
-# G-Factor Revisited
+# G-Factor Revisited  {.smaller}
 
 ::: incremental
 -   G-Factor is first proposed by Spearman [-@spearman1904] to account for the positive manifold of cognitive tests.
 
--   Studies showed structural [@deary2010, @jung2007] and functional [@neubauer2009, @vandenheuvel2009] brain features is highly predictable g-factor, especially for functional brain studies, g-factor is posited as a network property of brain.
+-   Studies showed structural [@deary2010; @jung2007] and functional [@neubauer2009; @vandenheuvel2009] brain features is highly predictable of g-factor, especially for functional brain studies, g-factor is posited as a network property of brain.
 
 -   But g-factor is estimated by factor analysis among a set of cognitive tasks
 
