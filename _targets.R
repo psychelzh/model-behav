@@ -269,5 +269,57 @@ list(
     cor_rapm,
     bind_rows(cor_rapm_pairs, cor_rapm_single)
   ),
+  tar_target(
+    pred_neural_single_task,
+    indices_wider_clean |>
+      pivot_longer(
+        -sub_id,
+        names_to = "variable",
+        values_to = "score"
+      ) |>
+      group_nest(variable) |>
+      mutate(
+        behav_no_covar = map(
+          data,
+          regress_behav_covar,
+          subjs_info = subjs_info_merged,
+          name_resp = "score"
+        ),
+        .keep = "unused"
+      ) |>
+      mutate(
+        r = map_dbl(
+          behav_no_covar,
+          ~ correlate_neural(
+            .,
+            neural_full_no_covar,
+            connections = "overall"
+          )$results[, "r"] |>
+            as.numeric()
+        ),
+        .keep = "unused"
+      )
+  ),
+  tar_target(
+    pred_efficiency_single_task,
+    indices_wider_clean |>
+      pivot_longer(
+        -sub_id,
+        names_to = "variable",
+        values_to = "score"
+      ) |>
+      group_nest(variable) |>
+      mutate(
+        r = map_dbl(
+          data,
+          ~ correlate_efficiency(
+            .,
+            global_efficencies,
+            subjs_info_merged,
+            name_behav = "score"
+          )$estimate
+        )
+      )
+  ),
   tarchetypes::tar_quarto(quarto_site)
 )
