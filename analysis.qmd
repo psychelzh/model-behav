@@ -475,8 +475,12 @@ plot_chord <- function(network, main, option = "D") {
     map_cols,
     transparency = 0.5
   )
+  net_labels <- sort(unique(network$from))
+  grid_col <- viridisLite::viridis(length(net_labels), option = "A") |> 
+    set_names(net_labels)
   chordDiagram(
     network,
+    grid.col = grid_col,
     col = col_fun,
     annotationTrack = c("name", "grid"),
     annotationTrackHeight = c(0.03, 0.01)
