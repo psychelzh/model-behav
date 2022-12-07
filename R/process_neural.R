@@ -2,13 +2,14 @@
 #'
 #' @title
 #' @param neural_data
-#' @param subjs_info_merged
+#' @param subset
 #' @return
 #' @author Liang Zhang
 #' @export
-restore_full_fc <- function(neural_data, subjs_info_merged) {
-  # discard non-matching data to reduce data size
-  neural_data <- neural_data[, subjs_info_merged$id]
+restore_full_fc <- function(neural_data, subset = NULL) {
+  if (!is.null(subset)) {
+    neural_data <- neural_data[, subset]
+  }
   # the answer to equation: n * (n - 1) / 2 = num_edges
   num_vars <- (sqrt((8 * nrow(neural_data)) + 1) + 1) / 2
   num_subjs <- ncol(neural_data)
@@ -20,6 +21,42 @@ restore_full_fc <- function(neural_data, subjs_info_merged) {
     res[, , subj] <- cor_mat
   }
   res
+}
+
+#' Threshold networks
+#'
+#' @title
+#' @param neural_full
+#' @param ... Arguments passed to [threshold()].
+#' @param include_negative
+#' @return
+#' @author Liang Zhang
+#' @export
+threshold_networks <- function(neural_full, ..., include_negative = FALSE) {
+  adjacencies <- array(dim = dim(neural_full))
+  for (i_sub in seq_len(dim(neural_full)[3])) {
+    neural_data <- neural_full[, , i_sub]
+    if (!include_negative) {
+      neural_data[neural_data < 0] <- 0
+    }
+    adjacencies[, , i_sub] <- binarize(threshold(neural_data, ...)$A)
+  }
+  adjacencies
+}
+
+#' Calculate global efficiency for each network
+#'
+#' @param network_adjencies
+#' @return
+#' @author Liang Zhang
+#' @export
+calc_efficencies <- function(network_adjencies) {
+  array_branch(network_adjencies, 3) |>
+    map_dbl(
+      ~ . |>
+        igraph::graph_from_adjacency_matrix() |>
+        brainGraph::efficiency(type = "global")
+    )
 }
 
 #' Match subjects from neural and behavioral data
@@ -39,32 +76,100 @@ match_subjs <- function(subjs_info, indices_wider_clean) {
     select(id, all_of(subj_vars))
 }
 
+#' Regress out co-variates
+#'
+#' @title
+#' @param neural_data
+#' @param subjs_info
+#' @param name_covars
+#' @return
+#' @author Liang Zhang
+#' @export
+regress_neural_covar <- function(neural_data, subjs_info,
+                                 name_covars = c("age", "gender", "scanner")) {
+  # discard non-matching data to reduce data size
+  neural_data <- neural_data[, subjs_info$id]
+  apply(
+    neural_data,
+    1,
+    \(x) {
+      with(
+        subjs_info,
+        str_c("x ~ ", str_c(name_covars, collapse = "+")) |>
+          as.formula() |>
+          lm() |>
+          resid()
+      )
+    }
+  ) |>
+    t()
+}
+regress_behav_covar <- function(behav, subjs_info,
+                                name_resp = "g",
+                                name_covars = c("age", "gender", "scanner")) {
+  data <- subjs_info |>
+    left_join(behav, by = "sub_id")
+  lm(
+    str_c(name_resp, " ~ ", str_c(name_covars, collapse = "+")) |>
+      as.formula(),
+    data,
+    na.action = na.exclude
+  ) |>
+    resid()
+}
+
 #' Use CPM method to correlate to neural data
 #'
 #' @title
-#' @param g_scores
-#' @param neural_full
-#' @param subjs_info_merged
+#' @param behav
+#' @param neural
 #' @param ... Further arguments passed to [NetworkToolbox::cpmIV()].
 #' @return
 #' @author Liang Zhang
 #' @export
-correlate_neural <- function(g_scores, neural_full, subjs_info_merged, ...) {
-  behav <- subjs_info_merged |>
-    left_join(g_scores, by = "sub_id") |>
-    pull(g)
-  if (anyNA(behav)) {
-    return(NULL)
-  }
-  covars <- as.list(select(subjs_info_merged, age, gender, scanner))
+correlate_neural <- function(behav, neural, ...) {
+  # remove subjects with NA values (only from behavioral measures)
+  keep_subjs <- !is.na(behav)
   cpmIV(
-    neural_full,
-    behav,
+    neural[, , keep_subjs],
+    behav[keep_subjs],
     kfolds = 10,
-    # covar = covars,
     cores = 1,
     plots = FALSE,
     progBar = FALSE,
     ...
   )
+}
+
+correlate_efficiency <- function(behav, efficiency, subjs_info,
+                                 name_behav = "g",
+                                 name_covars = c("age", "gender", "scanner")) {
+  data <- subjs_info |>
+    add_column(efficiency = efficiency) |>
+    left_join(behav, by = "sub_id") |>
+    drop_na()
+  ppcor::pcor.test(
+    data[[name_behav]],
+    data$efficiency,
+    as.matrix(data[, name_covars])
+  )
+}
+
+extract_cpm_corcoef <- function(cpm) {
+  if (!is.null(cpm)) {
+    cpm |>
+      pluck("results") |>
+      as_tibble() |>
+      transmute(r = as.numeric(r))
+  }
+}
+
+calc_mask_simil <- function(cpm_pairs) {
+  map(cpm_pairs, "Mask") |>
+    map(~ .[upper.tri(.)]) |>
+    bind_cols() |>
+    t() |>
+    proxy::simil(method = "dice") |>
+    unclass() |>
+    as_tibble_col("dice_mask")
 }

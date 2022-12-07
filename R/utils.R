@@ -84,3 +84,13 @@ summarise_ssd <- function(ssd) {
 id_cols <- function() {
   c("file", "sub_id", "task_datetime")
 }
+
+# special for paired analysis
+do_pairs <- function(.x, .fun, .at = c("first", "second"), ...,
+                     .bind = FALSE, .id = "part") {
+  res <- map_at(.x, .at, .fun, ...)
+  if (.bind) {
+    res <- bind_rows(res[.at], .id = .id)
+  }
+  res
+}

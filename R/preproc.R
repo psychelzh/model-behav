@@ -278,3 +278,25 @@ screen_data <- function(data) {
     ungroup() |>
     left_join(data, by = id_cols())
 }
+
+clean_indices <- function(indices, indices_selection) {
+  indices |>
+    inner_join(
+      filter(indices_selection, selected),
+      by = c("task", "index")
+    ) |>
+    mutate(score_norm = if_else(reversed, -score, score)) |>
+    group_by(disp_name, index) |>
+    filter(!performance::check_outliers(score, method = "iqr")) |>
+    ungroup()
+}
+
+reshape_data_wider <- function(indices) {
+  indices |>
+    unite("task_index", disp_name, index, remove = FALSE) |>
+    pivot_wider(
+      id_cols = sub_id,
+      names_from = task_index,
+      values_from = score_norm
+    )
+}
