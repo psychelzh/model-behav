@@ -1,7 +1,7 @@
 ---
 title: G-Factor Scores' Neural Predictability
 author: Liang Zhang
-date: 2022-11-17
+date: 2022-12-07
 format:
   revealjs:
     code-fold: false
