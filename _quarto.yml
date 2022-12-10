@@ -2,5 +2,8 @@ project:
   type: website
   output-dir: docs
 
+comments:
+  hypothesis: true
+
 execute:
   freeze: auto
