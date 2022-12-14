@@ -81,36 +81,13 @@ list(
       reshape_data_wider()
   ),
   tar_target(
-    indices_rapm_no_covar,
-    regress_behav_covar(
-      indices_rapm, subjs_info_merged,
-      name_resp = "rapm_score"
-    )
-  ),
-  tar_target(
-    cpm_rapm,
-    correlate_neural(
-      indices_rapm_no_covar,
-      neural_full_no_covar,
-      connections = "overall"
-    )
-  ),
-  tar_target(
-    pred_efficiency_rapm,
-    correlate_efficiency(
-      indices_rapm,
-      global_efficencies,
-      subjs_info_merged,
-      name_behav = "rapm_score"
-    )
-  ),
-  tar_target(
     indices_wider,
     reshape_data_wider(indices_clean)
   ),
   tar_target(
     indices_wider_clean,
     indices_wider |>
+      filter(sub_id < 17000) |>
       rowwise() |>
       filter(mean(is.na(c_across(-sub_id))) < 0.2) |>
       ungroup()
@@ -120,206 +97,28 @@ list(
     build_model(indices_wider_clean)
   ),
   tar_target(
-    full_g_scores,
-    extract_g_scores(indices_wider_clean, full_g_mdl)
+    full_g_fitmeasure,
+    summary(full_g_mdl, refModels = mxRefModels(full_g_mdl, run = TRUE))
   ),
   tar_target(
-    full_g_scores_no_covar,
-    regress_behav_covar(full_g_scores, subjs_info_merged)
-  ),
-  tar_target(
-    cpm_full_g,
-    correlate_neural(
-      full_g_scores_no_covar,
-      neural_full_no_covar,
-      connections = "overall"
-    )
-  ),
-  tar_target(
-    pred_efficiency_full_g,
-    correlate_efficiency(
-      full_g_scores,
-      global_efficencies,
-      subjs_info_merged,
-      name_behav = "g"
-    )
-  ),
-  tarchetypes::tar_file_read(
-    subjs_info,
-    "data/neural/subjs.csv",
-    read = read_csv(!!.x, show_col_types = FALSE)
-  ),
-  tarchetypes::tar_file_read(
-    neural_data,
-    "data/neural/fc_matrix.arrow",
-    read = as.matrix(arrow::read_feather(!!.x))
-  ),
-  tar_target(
-    subjs_info_merged,
-    match_subjs(subjs_info, indices_wider_clean)
-  ),
-  tar_target(
-    neural_full,
-    restore_full_fc(neural_data, subjs_info_merged$id)
-  ),
-  tar_target(
-    network_adjencies,
-    threshold_networks(
-      neural_full, include_negative = TRUE,
-      thresh = "proportional", a = 0.15
-    )
-  ),
-  tar_target(
-    global_efficencies,
-    calc_efficencies(network_adjencies)
-  ),
-  tar_target(
-    neural_data_no_covar,
-    regress_neural_covar(neural_data, subjs_info_merged)
-  ),
-  tar_target(
-    neural_full_no_covar,
-    restore_full_fc(neural_data_no_covar)
-  ),
-  # targets_neural_prediction.R
-  neural_prediction,
-  tarchetypes::tar_combine(
-    pred_neural_single,
-    neural_prediction[[1]],
-    command = bind_rows(!!!.x, .id = "num_vars") |>
-      mutate(num_vars = parse_number(num_vars))
-  ),
-  tarchetypes::tar_combine(
-    cor_sims_single,
-    neural_prediction[[2]],
-    command = bind_rows(!!!.x, .id = "name") |>
-      mutate(num_vars = parse_number(name), .keep = "unused")
-  ),
-  tarchetypes::tar_combine(
-    pred_efficiencies_single,
-    neural_prediction[[3]],
-    command = bind_rows(!!!.x, .id = "name") |>
-      mutate(num_vars = parse_number(name), .keep = "unused")
-  ),
-  tarchetypes::tar_combine(
-    cor_rapm_single,
-    neural_prediction[[4]],
-    command = bind_rows(!!!.x, .id = "name") |>
-      mutate(num_vars = parse_number(name), .keep = "unused")
-  ),
-  # targets_stability.R
-  factor_scores_stability,
-  tarchetypes::tar_combine(
-    intra_cor_g_scores_pairs,
-    factor_scores_stability[[1]],
-    command = bind_rows(!!!.x, .id = "num_vars") |>
-      mutate(num_vars = parse_number(num_vars))
-  ),
-  tarchetypes::tar_combine(
-    dice_mask_pairs,
-    factor_scores_stability[[2]],
-    command = bind_rows(!!!.x, .id = "num_vars") |>
-      mutate(num_vars = parse_number(num_vars))
-  ),
-  tarchetypes::tar_combine(
-    pred_neural_pairs,
-    factor_scores_stability[[3]],
-    command = list(!!!.x) |>
-      map(~ bind_rows(., .id = "src")) |>
-      bind_rows(.id = "num_vars") |>
-      mutate(num_vars = parse_number(num_vars))
-  ),
-  tarchetypes::tar_combine(
-    cor_sims_pairs,
-    factor_scores_stability[[4]],
-    command = list(!!!.x) |>
-      map(~ bind_rows(., .id = "src")) |>
-      bind_rows(.id = "num_vars") |>
-      mutate(num_vars = parse_number(num_vars))
-  ),
-  tarchetypes::tar_combine(
-    pred_efficiencies_pairs,
-    factor_scores_stability[[5]],
-    command = list(!!!.x) |>
-      map(~ bind_rows(., .id = "src")) |>
-      bind_rows(.id = "num_vars") |>
-      mutate(num_vars = parse_number(num_vars))
-  ),
-  tarchetypes::tar_combine(
-    cor_rapm_pairs,
-    factor_scores_stability[[6]],
-    command = list(!!!.x) |>
-      map(~ bind_rows(., .id = "src")) |>
-      bind_rows(.id = "num_vars") |>
-      mutate(num_vars = parse_number(num_vars))
-  ),
-  tar_target(
-    cor_sims,
-    bind_rows(cor_sims_pairs, cor_sims_single)
-  ),
-  tar_target(
-    pred_neural,
-    bind_rows(pred_neural_pairs, pred_neural_single)
-  ),
-  tar_target(
-    pred_efficiencies,
-    bind_rows(pred_efficiencies_pairs, pred_efficiencies_single)
-  ),
-  tar_target(
-    cor_rapm,
-    bind_rows(cor_rapm_pairs, cor_rapm_single)
-  ),
-  tar_target(
-    pred_neural_single_task,
-    indices_wider_clean |>
-      pivot_longer(
-        -sub_id,
-        names_to = "variable",
-        values_to = "score"
-      ) |>
-      group_nest(variable) |>
-      mutate(
-        behav_no_covar = map(
-          data,
-          regress_behav_covar,
-          subjs_info = subjs_info_merged,
-          name_resp = "score"
-        ),
-        .keep = "unused"
-      ) |>
-      mutate(
-        r = map_dbl(
-          behav_no_covar,
-          ~ correlate_neural(
-            .,
-            neural_full_no_covar,
-            connections = "overall"
-          )$results[, "r"] |>
-            as.numeric()
-        ),
-        .keep = "unused"
+    mdl_bifac, {
+      mdl_data <- select(indices_wider_clean, -sub_id)
+      mdl_bifac <- psych::omega(mdl_data, 6, plot = FALSE)
+      lavaan::cfa(
+        mdl_bifac$model$lavaan, mdl_data, missing = "fiml",
+        std.ov = T, std.lv = T, orthogonal = TRUE
       )
+    }
   ),
   tar_target(
-    pred_efficiency_single_task,
-    indices_wider_clean |>
-      pivot_longer(
-        -sub_id,
-        names_to = "variable",
-        values_to = "score"
-      ) |>
-      group_nest(variable) |>
-      mutate(
-        r = map_dbl(
-          data,
-          ~ correlate_efficiency(
-            .,
-            global_efficencies,
-            subjs_info_merged,
-            name_behav = "score"
-          )$estimate
-        )
-      )
+    mdl_no_rt, {
+      mdl_data_no_rt <- indices_wider_clean |>
+        select(-sub_id, -contains("mrt"), -crt_ies)
+      umxEFA(mdl_data_no_rt, factors = "g")
+    }
   ),
-  tarchetypes::tar_quarto(quarto_site)
+  tar_target(
+    mdl_no_rt_fitmeasure,
+    summary(mdl_no_rt, refModels = mxRefModels(mdl_no_rt, run = TRUE))
+  )
 )

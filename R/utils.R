@@ -18,8 +18,8 @@ calc_auc_ltm <- function(data,
     mutate(
       acc = if_else(
         .data[[name_type]] == "s",
-        .data[[name_resp]] > crit,
-        .data[[name_resp]] <= crit
+        .data[[name_resp]] > crit & .data[[name_resp]] != 0,
+        .data[[name_resp]] <= crit & .data[[name_resp]] != 0
       )
     ) |>
     group_by(across(all_of(c(.by, "crit", name_type)))) |>

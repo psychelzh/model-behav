@@ -1,5 +1,9 @@
 preproc_antisac <- function(data) {
-  calc_spd_acc(data, .by = id_cols())
+  data |>
+    group_by(across(all_of(id_cols()))) |>
+    filter(sum(acc == 1) > qbinom(0.95, n(), 0.5)) |>
+    ungroup() |>
+    calc_spd_acc(.by = id_cols())
 }
 
 #' Switch Cost
@@ -88,17 +92,15 @@ preproc_filtering <- function(data) {
 #' "FNRecog, KRecog"
 preproc_ltm <- function(data) {
   data |>
-    # remove subjects with too much quick responses
-    group_by(across(all_of(id_cols()))) |>
-    filter(mean(rt > 1) > 0.8) |>
+    group_by(across(id_cols())) |>
+    filter(mean(is.na(resp) | resp == 0) < 0.1) |>
     ungroup() |>
     mutate(type_sig = if_else(type == "old", "s", "n")) |>
     calc_auc_ltm(
       name_type = "type_sig",
       name_resp = "resp",
       .by = id_cols()
-    ) |>
-    filter(auc > 0.5)
+    )
 }
 #' Complex Span
 preproc_ospan <- function(data) {
@@ -167,9 +169,7 @@ preproc_spst <- function(data) {
 preproc_stopsignal <- function(data) {
   # remove negative ssd subjects
   data_clean <- data |>
-    group_by(across(all_of(id_cols()))) |>
-    filter(!any(ssd < 0)) |>
-    ungroup()
+    mutate(ssd = if_else(ssd < 100 & is_stop == 1, 100, ssd))
   ssd <- data_clean |>
     filter(is_stop == 1) |>
     group_by(across(all_of(c(id_cols(), "stair_case")))) |>
