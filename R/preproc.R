@@ -247,6 +247,40 @@ preproc_stroop <- function(data) {
     )
 }
 
+preproc_penncnp <- function(data) {
+  cpt <- data |>
+    select(sub_id = tet_eion.ubid, starts_with("NUM6CPT")) |>
+    filter(NUM6CPT.CPN6_SEN > 0.5) |>
+    mutate(
+      across(
+        c(NUM6CPT.CPN6_TP, NUM6CPT.CPN6_FN),
+        ~ coalesce(., 0)  + 1 / 3
+      ),
+      across(
+        c(NUM6CPT.CPN6_FP, NUM6CPT.CPN6_TN),
+        ~ coalesce(., 0) + 2 / 3
+      ),
+      NUM6CPT.CPN6_HIT = NUM6CPT.CPN6_TP / (NUM6CPT.CPN6_TP + NUM6CPT.CPN6_FN),
+      NUM6CPT.CPN6_FA = NUM6CPT.CPN6_FP / (NUM6CPT.CPN6_FP + NUM6CPT.CPN6_TN),
+      NUM6CPT.dprime = qnorm(NUM6CPT.CPN6_HIT) - qnorm(NUM6CPT.CPN6_FA)
+    ) |>
+    select(sub_id, mrt = NUM6CPT.CPN6_TPRT, dprime = NUM6CPT.dprime) |>
+    pivot_longer(
+      -sub_id,
+      names_to = "index",
+      values_to = "score"
+    ) |>
+    add_column(
+      task = "NUM6CPT",
+      disp_name = "cpt",
+      .after = "sub_id"
+    )
+  lot <- data |>
+    select(sub_id = tet_eion.ubid, score = VSPLOT24.VSPLOT_TC) |>
+    add_column(index = "nc", task = "VSPLOT24", disp_name = "vsplot")
+  bind_rows(cpt, lot)
+}
+
 preproc_existed <- function(data, ..., disp_name) {
   data |>
     select(sub_id = ID, ...) |>
@@ -293,7 +327,7 @@ clean_indices <- function(indices, indices_selection) {
 
 reshape_data_wider <- function(indices) {
   indices |>
-    unite("task_index", disp_name, index, remove = FALSE) |>
+    unite("task_index", disp_name, index) |>
     pivot_wider(
       id_cols = sub_id,
       names_from = task_index,

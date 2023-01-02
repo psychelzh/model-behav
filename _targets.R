@@ -20,6 +20,15 @@ list(
     read = read_csv(!!.x, show_col_types = FALSE)
   ),
   tarchetypes::tar_file_read(
+    data_penncnp,
+    "data/behav/penncnp.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
+  ),
+  tar_target(
+    indices_penncnp,
+    preproc_penncnp(data_penncnp)
+  ),
+  tarchetypes::tar_file_read(
     data_clean,
     "data/behav/data_clean.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
@@ -63,6 +72,7 @@ list(
       bind_rows(
         indices_keepTrack,
         indices_FM,
+        indices_penncnp,
         indices_Raven
       ) |>
       left_join(sub_id_transform, by = c("sub_id" = "behav_id")) |>
