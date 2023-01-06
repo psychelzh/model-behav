@@ -328,12 +328,21 @@ clean_indices <- function(indices, indices_selection) {
     ungroup()
 }
 
-reshape_data_wider <- function(indices) {
+reshape_data_wider <- function(indices, name_score = "score") {
   indices |>
-    unite("task_index", disp_name, index) |>
+    group_by(task) |>
+    mutate(n_indices = n_distinct(index)) |>
+    ungroup() |>
+    mutate(
+      task_index = if_else(
+        n_indices == 1,
+        disp_name,
+        str_c(disp_name, index, sep = "-")
+      )
+    ) |>
     pivot_wider(
       id_cols = sub_id,
       names_from = task_index,
-      values_from = score_norm
+      values_from = all_of(name_score)
     )
 }

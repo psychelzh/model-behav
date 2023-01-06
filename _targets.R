@@ -92,7 +92,7 @@ list(
   ),
   tar_target(
     indices_wider,
-    reshape_data_wider(indices_clean)
+    reshape_data_wider(indices_clean, name_score = "score_norm")
   ),
   tar_target(
     indices_wider_clean,
