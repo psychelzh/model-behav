@@ -38,7 +38,7 @@ list(
     preproc_existed(
       data_clean,
       Keeptrack_ScoreAll,
-      disp_name = "keep_track"
+      disp_name = "KPTRK"
     )
   ),
   tar_target(
@@ -46,7 +46,7 @@ list(
     preproc_existed(
       data_clean,
       starts_with("FM"),
-      disp_name = "false_mem"
+      disp_name = "FM"
     )
   ),
   tar_target(
@@ -54,7 +54,7 @@ list(
     preproc_existed(
       data_clean,
       all_of(c(Raven_score = "Raven2")),
-      disp_name = "rapm"
+      disp_name = "RAPM"
     )
   ),
   # targets_clean_behav.R
