@@ -1,7 +1,10 @@
+#' Anti-Saccade Task
+#'
+#' This task is relatively hard
 preproc_antisac <- function(data) {
   data |>
     group_by(across(all_of(id_cols()))) |>
-    filter(sum(acc == 1) > qbinom(0.95, n(), 0.5)) |>
+    filter(sum(acc == 1) > qbinom(0.95, n(), 1 / 3)) |>
     ungroup() |>
     calc_spd_acc(.by = id_cols())
 }
