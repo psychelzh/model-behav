@@ -81,13 +81,9 @@ list(
   tar_target(indices_clean, clean_indices(indices, indices_selection)),
   tar_target(
     indices_rapm,
-    clean_indices(
-      indices,
-      tribble(
-        ~task, ~index, ~selected, ~reversed,
-        "Raven", "score", TRUE, FALSE
-      )
-    ) |>
+    indices |>
+      filter(task == "Raven", index == "score") |>
+      filter(!performance::check_outliers(score, method = "iqr")) |>
       reshape_data_wider()
   ),
   tar_target(
