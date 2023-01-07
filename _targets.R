@@ -1,6 +1,6 @@
 library(targets)
 tar_option_set(
-  packages = c("tidyverse", "umx", "NetworkToolbox", "conflicted"),
+  packages = c("tidyverse", "lavaan", "conflicted"),
   memory = "transient",
   garbage_collection = TRUE,
   error = "null",
@@ -98,33 +98,20 @@ list(
       filter(mean(is.na(c_across(-sub_id))) < 0.2) |>
       ungroup()
   ),
-  tar_target(
-    full_g_mdl,
-    build_model(indices_wider_clean)
+  tarchetypes::tar_file_read(
+    mdl_spec,
+    "config/behav.lavaan",
+    read = readLines(!!.x)
   ),
   tar_target(
-    full_g_fitmeasure,
-    summary(full_g_mdl, refModels = mxRefModels(full_g_mdl, run = TRUE))
+    mdl,
+    cfa(mdl_spec, indices_wider_clean, std.ov = TRUE, missing = "fiml")
   ),
   tar_target(
-    mdl_bifac, {
-      mdl_data <- select(indices_wider_clean, -sub_id)
-      mdl_bifac <- psych::omega(mdl_data, 6, plot = FALSE)
-      lavaan::cfa(
-        mdl_bifac$model$lavaan, mdl_data, missing = "fiml",
-        std.ov = T, std.lv = T, orthogonal = TRUE
-      )
-    }
-  ),
-  tar_target(
-    mdl_no_rt, {
-      mdl_data_no_rt <- indices_wider_clean |>
-        select(-sub_id, -contains("mrt"), -crt_ies)
-      umxEFA(mdl_data_no_rt, factors = "g")
-    }
-  ),
-  tar_target(
-    mdl_no_rt_fitmeasure,
-    summary(mdl_no_rt, refModels = mxRefModels(mdl_no_rt, run = TRUE))
+    scores_latent,
+    bind_cols(
+      select(indices_wider_clean, sub_id),
+      as_tibble(unclass(lavPredict(mdl)))
+    )
   )
 )
