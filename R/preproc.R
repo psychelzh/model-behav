@@ -275,12 +275,12 @@ preproc_penncnp <- function(data) {
     ) |>
     add_column(
       task = "NUM6CPT",
-      disp_name = "CPT",
+      disp_name = "PCPT",
       .after = "sub_id"
     )
   lot <- data |>
     select(sub_id = tet_eion.ubid, score = VSPLOT24.VSPLOT_TC) |>
-    add_column(index = "nc", task = "VSPLOT24", disp_name = "VSPLOT")
+    add_column(index = "nc", task = "VSPLOT24", disp_name = "PLOT")
   bind_rows(cpt, lot)
 }
 
