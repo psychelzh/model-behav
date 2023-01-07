@@ -57,17 +57,17 @@ list(
       disp_name = "RAPM"
     )
   ),
-  # targets_clean_behav.R
-  load_data_behav,
+  # targets_preproc_behav.R
+  preproc_behav,
   tarchetypes::tar_combine(
     indices,
-    load_data_behav[[1]],
+    preproc_behav[[1]],
     command = bind_rows(
       !!!.x,
       .id = "task"
     ) |>
       mutate(task = str_remove(task, "indices_")) |>
-      left_join(config, by = "task") |>
+      left_join(task_preproc, by = "task") |>
       select(-preproc) |>
       bind_rows(
         indices_keepTrack,
@@ -104,14 +104,14 @@ list(
     read = readLines(!!.x)
   ),
   tar_target(
-    mdl,
+    mdl_fitted,
     cfa(mdl_spec, indices_wider_clean, std.ov = TRUE, missing = "fiml")
   ),
   tar_target(
     scores_latent,
     bind_cols(
       select(indices_wider_clean, sub_id),
-      as_tibble(unclass(lavPredict(mdl)))
+      as_tibble(unclass(lavPredict(mdl_fitted)))
     )
   )
 )

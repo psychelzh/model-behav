@@ -1,9 +1,9 @@
 # for indices pre-processing
-config <- readr::read_csv("config/task_preproc.csv", show_col_types = FALSE) |>
+task_preproc <- readr::read_csv("config/task_preproc.csv", show_col_types = FALSE) |>
   tidyr::drop_na() |>
   dplyr::mutate(preproc = rlang::syms(paste0("preproc_", preproc)))
-load_data_behav <- tarchetypes::tar_map(
-  config,
+preproc_behav <- tarchetypes::tar_map(
+  task_preproc,
   names = task,
   list(
     tar_target(
