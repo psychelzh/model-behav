@@ -113,5 +113,6 @@ list(
       select(indices_wider_clean, sub_id),
       as_tibble(unclass(lavPredict(mdl_fitted)))
     )
-  )
+  ),
+  targets_cpm
 )
