@@ -1,0 +1,176 @@
+---
+title: Modeling Behavior
+author: Liang Zhang
+date: 2022-12-13
+format: 
+  revealjs: 
+    code-fold: false
+execute:
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(umx)
+```
+
+# Data Inspection
+
+## Distribution
+
+```{r}
+#| label: fig-distr
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Distributions for All Tasks.** They are all all fairly distributed as
+#|   normal.
+
+targets::tar_load(indices_clean)
+indices_clean |>
+  ggplot(aes(score)) +
+  geom_histogram() +
+  facet_wrap(~ disp_name + index, scales = "free")
+```
+
+## Missing Pattern
+
+```{r}
+#| label: fig-miss-pattern
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Misssing pattern.** 
+
+targets::tar_load(indices_wider_clean)
+mdl_data <- select(indices_wider_clean, -sub_id)
+mdl_data |>
+  naniar::vis_miss() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+## Correlation Matrix
+
+```{r}
+#| label: fig-correlation
+#| fig-width: 8
+#| fig-height: 8
+#| fig-cap: "**Correlation Between Tasks**"
+
+mdl_data |>
+  corrr::correlate() |>
+  corrr::autoplot(
+    method = "HC",
+    low = "blue", 
+    high = "red", 
+    mid = "white"
+  )
+```
+
+# Modeling
+
+## One factor model
+
+```{r}
+#| label: fig-loading-one-factor
+#| fig-height: 6
+#| fig-width: 8
+#| fig-cap: >
+#|   **Factor loadings for one factor only.** Note the largest loadings are 
+#|   mainly from response time tasks. The fit measures are also low.
+
+targets::tar_load(full_g_mdl)
+targets::tar_load(full_g_fitmeasure)
+df_print <- full_g_fitmeasure[c("CFI", "TLI", "RMSEA")] |> 
+  as_tibble() |> 
+  mutate(across(.fns = ~ round(., 2)))
+loadings(full_g_mdl) |> 
+  as_tibble(rownames = "variable") |> 
+  ggplot(aes(g, fct_reorder(variable, g))) +
+  geom_point() +
+  ggpp::geom_table_npc(
+    data = tibble(x = 0.05, y = 0.95, tb = list(df_print)),
+    mapping = aes(npcx = x, npcy = y, label = tb)
+  ) +
+  labs(x = "Loading", y = "Task Index") +
+  theme_bw()
+```
+
+## Bi-factor Model
+
+```{r}
+#| label: fig-loading-bifactor
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Loadings on g for bifactor model.**
+
+targets::tar_load(mdl_bifac)
+df_print <- lavaan::fitmeasures(mdl_bifac)[c("cfi", "tli", "rmsea")] |> 
+  as_tibble_row() |> 
+  rename_with(toupper) |> 
+  mutate(across(.fns = ~ round(., 2)))
+lavaan::coef(mdl_bifac) |> 
+  enframe(name = "term", value = "loading") |> 
+  filter(str_starts(term, "g")) |> 
+  mutate(variable = str_extract(term, "(?<=~).+")) |> 
+  ggplot(aes(loading, fct_reorder(variable, loading))) +
+  geom_point() +
+  ggpp::geom_table_npc(
+    data = tibble(x = 0.05, y = 0.95, tb = list(df_print)),
+    mapping = aes(npcx = x, npcy = y, label = tb)
+  ) +
+  labs(x = "Loading", y = "Task Index") +
+  theme_bw()
+```
+
+## Correlation between two G factor scores
+
+```{r}
+#| label: fig-cor-between-g
+#| fig-height: 6
+#| fig-width: 8
+#| fig-cap: >
+#|   **Correlation between G factor scores.** The correlation is very high, so
+#|   the results can be similar.
+
+tibble(
+  score_g_one = umxFactorScores(full_g_mdl, type = "WeightedML", minManifests = 1)[, 1],
+  score_g_bifac = lavaan::predict(mdl_bifac)[, "g"]
+) |> 
+  ggplot(aes(score_g_one, score_g_bifac)) +
+  geom_point() +
+  ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p"))) +
+  theme_bw()
+```
+
+## Remove response time indices
+
+```{r}
+#| label: fig-mdl-no-resp
+#| fig-height: 6
+#| fig-width: 8
+#| fig-cap: >
+#|   **Factor loadings without response time indices.**
+
+targets::tar_load(mdl_no_rt)
+targets::tar_load(mdl_no_rt_fitmeasure)
+df_print <- mdl_no_rt_fitmeasure[c("CFI", "TLI", "RMSEA")] |> 
+  as_tibble() |> 
+  mutate(across(.fns = ~ round(., 2)))
+loadings(mdl_no_rt) |> 
+  as_tibble(rownames = "variable") |> 
+  ggplot(aes(g, fct_reorder(variable, g))) +
+  geom_point() +
+  ggpp::geom_table_npc(
+    data = tibble(x = 0.05, y = 0.95, tb = list(df_print)),
+    mapping = aes(npcx = x, npcy = y, label = tb)
+  ) +
+  labs(x = "Loading", y = "Task Index") +
+  theme_bw()
+```
+
