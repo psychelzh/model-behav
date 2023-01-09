@@ -114,5 +114,15 @@ list(
       as_tibble(unclass(lavPredict(mdl_fitted)))
     )
   ),
-  targets_cpm
+  targets_cpm,
+  tarchetypes::tar_combine(
+    cpmcors,
+    targets_cpm$cpmcors,
+    command = bind_rows(!!!.x, .id = "id") |>
+      separate(
+        id,
+        c(NA, "modal", "parcel", "gsr", "latent"),
+        convert = TRUE
+      )
+  )
 )

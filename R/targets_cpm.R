@@ -8,30 +8,40 @@ do_cpm <- function(fc_data, scores, thresh_method, thresh_level) {
     tidytable::inner_join(scores, by = "sub_id") |>
     select(-sub_id) |>
     as.matrix()
-  cpm(
+  result <- cpm(
     data,
     kfolds = 10,
     thresh_method = thresh_method,
     thresh_level = thresh_level
   )
+  with(
+    result,
+    tribble(
+      ~edge_type, ~mask_prop, ~behav_pred, ~cor,
+      "pos", mask_prop_pos, behav_pred_pos, cor_pos,
+      "neg", mask_prop_neg, behav_pred_neg, cor_neg,
+      "all", NULL, behav_pred_all, cor_all
+    )
+  )
 }
 
 config_fc_data <- tidyr::expand_grid(
   modal = c("emotion", "facename",
-            "Nbackrun1", "Nbackrun2",
+            "Nbackrun1", "Nbackrun2", "nback",
             "4tasks", "rest", "4tasksrest"),
   parcel = c("nn268", "Power264"),
   gsr = c("with", "without"),
-  latent = c("g", "Speed", "WM", "Memory", "Flex"),
-  dplyr::bind_rows(
-    tibble::tibble(
-      thresh_method = "alpha",
-      thresh_level = 1 # 1 = 0.01
-    ),
-    tibble::tibble(
-      thresh_method = "sparsity",
-      thresh_level = 1 # 1 = 0.01
-    )
+  latent = c("g", "Speed", "WM", "Memory", "Flex")
+)
+
+hypers_thresh <- dplyr::bind_rows(
+  tibble::tibble(
+    thresh_method = "alpha",
+    thresh_level = 1 # 1 = 0.01
+  ),
+  tibble::tibble(
+    thresh_method = "sparsity",
+    thresh_level = 1 # 1 = 0.01
   )
 )
 
@@ -46,26 +56,27 @@ targets_cpm <- tarchetypes::tar_map(
       ),
       read = arrow::read_feather(!!.x)
     ),
-    tarchetypes::tar_rep(
+    tarchetypes::tar_map_rep(
       result_cpm,
-      do_cpm(
+      command = do_cpm(
         fc_data,
         scores_latent[, c("sub_id", latent)],
-        thresh_method = thresh_method,
-        thresh_level = thresh_level
+        thresh_method,
+        thresh_level
       ),
+      values = hypers_thresh,
       batches = 25,
-      reps = 4,
-      iteration = "list"
+      reps = 4
     ),
-    tarchetypes::tar_rep2(
-      correlations,
-      data.frame(
-        cor_pos = result_cpm[[1]]$cor_pos$estimate,
-        cor_neg = result_cpm[[1]]$cor_neg$estimate,
-        cor_all = result_cpm[[1]]$cor_all$estimate
-      ),
-      result_cpm
+    tar_target(
+      cpmcors,
+      result_cpm |>
+        select(-mask_prop, -behav_pred) |>
+        mutate(
+          map_df(cor, broom::tidy),
+          .keep = "unused",
+          .before = starts_with("tar")
+        )
     )
   )
 )
