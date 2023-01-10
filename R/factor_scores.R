@@ -27,7 +27,6 @@ resample_data_pairs <- function(data, num_vars, id_cols = "sub_id") {
 build_model <- function(data, id_cols = "sub_id") {
   data |>
     select(-all_of(id_cols), -any_of(contains("tar"))) |>
-    as.data.frame() |>
     umxEFA(factors = "g")
 }
 
