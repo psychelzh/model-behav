@@ -1,9 +1,4 @@
 do_cpm <- function(fc_data, scores, thresh_method, thresh_level) {
-  thresh_level <- switch(
-    thresh_method,
-    alpha = c(0.01, 0.005, 0.001)[thresh_level],
-    sparsity = c(0.01, 0.025, 0.05, 0.1)[thresh_level]
-  )
   data <- fc_data |>
     tidytable::inner_join(scores, by = "sub_id") |>
     select(-sub_id) |>
@@ -40,11 +35,11 @@ hypers_behav <- data.frame(
 hypers_thresh <- dplyr::bind_rows(
   tibble::tibble(
     thresh_method = "alpha",
-    thresh_level = 1 # 1 = 0.01
+    thresh_level = 0.01
   ),
   tibble::tibble(
     thresh_method = "sparsity",
-    thresh_level = 1 # 1 = 0.01
+    thresh_level = 0.01
   )
 )
 
