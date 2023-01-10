@@ -10,6 +10,11 @@ tar_source()
 future::plan(future.callr::callr)
 list(
   tarchetypes::tar_file_read(
+    subjs_info,
+    "data/subjs.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
+  ),
+  tarchetypes::tar_file_read(
     indices_selection,
     "config/indices_selection.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
