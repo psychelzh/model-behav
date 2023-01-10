@@ -121,7 +121,18 @@ list(
     command = bind_rows(!!!.x, .id = "id") |>
       separate(
         id,
-        c(NA, "modal", "parcel", "gsr", "latent"),
+        c(NA, "modal", "parcel", "gsr"),
+        convert = TRUE
+      )
+  ),
+  targets_cpm_rest2,
+  tarchetypes::tar_combine(
+    cpmcors_rest2,
+    targets_cpm_rest2$cpmcors,
+    command = bind_rows(!!!.x, .id = "id") |>
+      separate(
+        id,
+        c(NA, "modal", "parcel", "gsr"),
         convert = TRUE
       )
   )
